@@ -7,13 +7,16 @@ import { StripeCheckoutMetaData } from "@/app/actions/createStripeCheckoutSessio
 import { Id } from "@/convex/_generated/dataModel";
 
 export async function POST(req: Request) {
-  console.log("Webhook received");
+  console.log("=== STRIPE WEBHOOK RECEIVED ===");
+  console.log("Timestamp:", new Date().toISOString());
+  console.log("Request URL:", req.url);
 
   const body = await req.text();
   const headersList = await headers();
   const signature = headersList.get("stripe-signature") as string;
 
   console.log("Webhook signature:", signature ? "Present" : "Missing");
+  console.log("Body length:", body.length);
 
   let event: Stripe.Event;
 

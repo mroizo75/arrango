@@ -43,16 +43,32 @@ async function TicketSuccess({
   if (!latestTicket) {
     return (
       <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-3xl mx-auto text-center">
-          <h1 className="text-3xl font-bold text-gray-900">
-            Behandler bestillingen...
-          </h1>
-          <p className="mt-2 text-gray-600">
-            Vennligst vent mens vi bekrefter betalingen din.
-          </p>
-          <p className="mt-4 text-sm text-gray-500">
-            Dette tar vanligvis bare noen sekunder. Hvis du ikke ser billetten din snart, vennligst refresh siden.
-          </p>
+        <div className="max-w-3xl mx-auto text-center space-y-6">
+          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6">
+            <h1 className="text-3xl font-bold text-yellow-900 mb-4">
+              ⏳ Behandler bestillingen...
+            </h1>
+            <p className="text-lg text-yellow-800 mb-2">
+              Vennligst vent mens vi bekrefter betalingen din.
+            </p>
+            <p className="text-sm text-yellow-700">
+              Dette tar vanligvis bare noen sekunder.
+            </p>
+          </div>
+
+          <div className="bg-white border border-gray-200 rounded-lg p-6 text-left">
+            <h2 className="text-xl font-semibold text-gray-900 mb-3">
+              Ser du ikke billetten din?
+            </h2>
+            <ul className="space-y-2 text-gray-700">
+              <li>• <strong>Refresh siden</strong> om noen sekunder</li>
+              <li>• Sjekk <a href="/tickets" className="text-blue-600 hover:underline">Mine Billetter</a></li>
+              <li>• Session ID: <code className="text-xs bg-gray-100 px-2 py-1 rounded">{sessionId || "N/A"}</code></li>
+            </ul>
+            <p className="mt-4 text-sm text-gray-600">
+              Hvis problemet vedvarer etter 1 minutt, kontakt support med Session ID over.
+            </p>
+          </div>
         </div>
       </div>
     );
