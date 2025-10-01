@@ -2,6 +2,7 @@ import { getConvexClient } from "@/lib/convex";
 import { api } from "@/convex/_generated/api";
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
+import Link from "next/link";
 import Ticket from "@/components/Ticket";
 
 async function TicketSuccess({
@@ -62,7 +63,7 @@ async function TicketSuccess({
             </h2>
             <ul className="space-y-2 text-gray-700">
               <li>• <strong>Refresh siden</strong> om noen sekunder</li>
-              <li>• Sjekk <a href="/tickets" className="text-blue-600 hover:underline">Mine Billetter</a></li>
+              <li>• Sjekk <Link href="/tickets" className="text-blue-600 hover:underline">Mine Billetter</Link></li>
               <li>• Session ID: <code className="text-xs bg-gray-100 px-2 py-1 rounded">{sessionId || "N/A"}</code></li>
             </ul>
             <p className="mt-4 text-sm text-gray-600">
