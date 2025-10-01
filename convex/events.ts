@@ -200,6 +200,10 @@ export const purchaseTicket = mutation({
       amount: v.number(),
       ticketTypeId: v.optional(v.id("ticketTypes")),
       currency: v.optional(v.string()),
+      cart: v.optional(v.array(v.object({
+        ticketTypeId: v.id("ticketTypes"),
+        quantity: v.number(),
+      }))),
     }),
   },
   handler: async (ctx, { eventId, userId, waitingListId, paymentInfo }) => {
@@ -249,32 +253,54 @@ export const purchaseTicket = mutation({
       throw new Error("Event is no longer active");
     }
 
-    // Handle ticket type inventory if specified
-    if (paymentInfo.ticketTypeId) {
+    try {
+      // Handle ticket inventory for cart or single ticket type
+      if (paymentInfo.cart && paymentInfo.cart.length > 0) {
+      // Bulk purchase - update inventory for each ticket type in cart
+      for (const cartItem of paymentInfo.cart) {
+        await ctx.runMutation(api.ticketTypes.updateTicketTypeSoldQuantity, {
+          ticketTypeId: cartItem.ticketTypeId,
+          quantityChange: cartItem.quantity,
+        });
+      }
+
+      // Create tickets for each cart item
+      for (const cartItem of paymentInfo.cart) {
+        const ticketType = await ctx.db.get(cartItem.ticketTypeId);
+        if (!ticketType) continue;
+
+        for (let i = 0; i < cartItem.quantity; i++) {
+          await ctx.db.insert("tickets", {
+            eventId,
+            ticketTypeId: cartItem.ticketTypeId,
+            userId,
+            purchasedAt: Date.now(),
+            status: TICKET_STATUS.VALID,
+            paymentIntentId: paymentInfo.paymentIntentId,
+            amount: ticketType.price,
+            currency: ticketType.currency,
+          });
+        }
+      }
+    } else if (paymentInfo.ticketTypeId) {
+      // Single ticket purchase (backward compatibility)
       await ctx.runMutation(api.ticketTypes.updateTicketTypeSoldQuantity, {
         ticketTypeId: paymentInfo.ticketTypeId,
         quantityChange: 1,
       });
-    }
 
-    try {
-      console.log("Creating ticket with payment info", paymentInfo);
-      // Create ticket with payment info
-      const ticketData: any = {
+      const ticketType = await ctx.db.get(paymentInfo.ticketTypeId);
+      await ctx.db.insert("tickets", {
         eventId,
+        ticketTypeId: paymentInfo.ticketTypeId,
         userId,
         purchasedAt: Date.now(),
         status: TICKET_STATUS.VALID,
         paymentIntentId: paymentInfo.paymentIntentId,
-        amount: paymentInfo.amount,
-        currency: paymentInfo.currency || "NOK",
-      };
-
-      if (paymentInfo.ticketTypeId) {
-        ticketData.ticketTypeId = paymentInfo.ticketTypeId;
-      }
-
-      await ctx.db.insert("tickets", ticketData);
+        amount: ticketType ? ticketType.price : paymentInfo.amount,
+        currency: ticketType ? ticketType.currency : (paymentInfo.currency || "NOK"),
+      });
+    }
 
       console.log("Updating waiting list status to purchased");
       await ctx.db.patch(waitingListId, {

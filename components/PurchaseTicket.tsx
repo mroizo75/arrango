@@ -21,12 +21,21 @@ export default function PurchaseTicket({ eventId }: { eventId: Id<"events"> }) {
 
   const [timeRemaining, setTimeRemaining] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [selectedTicketType, setSelectedTicketType] = useState<{
-    _id: Id<"ticketTypes">;
-    name: string;
-    price: number;
-    currency: string;
-  } | null>(null);
+  const [cart, setCart] = useState<Array<{
+    ticketType: {
+      _id: Id<"ticketTypes">;
+      name: string;
+      description?: string;
+      price: number;
+      currency: string;
+      maxQuantity: number;
+      soldQuantity: number;
+      availableQuantity: number;
+      isSoldOut: boolean;
+      benefits?: string[];
+    };
+    quantity: number;
+  }>>([]);
 
   const offerExpiresAt = queuePosition?.offerExpiresAt ?? 0;
   const isExpired = Date.now() > offerExpiresAt;
@@ -59,13 +68,18 @@ export default function PurchaseTicket({ eventId }: { eventId: Id<"events"> }) {
   }, [offerExpiresAt, isExpired]);
 
   const handlePurchase = async () => {
-    if (!user || !selectedTicketType) return;
+    if (!user || cart.length === 0) return;
 
     try {
       setIsLoading(true);
+
+      // Send cart data for bulk purchase
       const { sessionUrl } = await createStripeCheckoutSession({
         eventId,
-        ticketTypeId: selectedTicketType._id,
+        cart: cart.map(item => ({
+          ticketTypeId: item.ticketType._id,
+          quantity: item.quantity,
+        })),
       });
 
       if (sessionUrl) {
@@ -108,18 +122,18 @@ export default function PurchaseTicket({ eventId }: { eventId: Id<"events"> }) {
           </div>
         </div>
 
-        {/* Ticket Type Selection */}
+        {/* Ticket Selection */}
         <div className="bg-gray-50 rounded-lg p-4">
           <TicketTypeSelector
             eventId={eventId}
-            selectedTypeId={selectedTicketType?._id}
-            onTypeSelect={setSelectedTicketType}
+            cart={cart}
+            onCartUpdate={setCart}
           />
         </div>
 
         <button
           onClick={handlePurchase}
-          disabled={isExpired || isLoading || !selectedTicketType}
+          disabled={isExpired || isLoading || cart.length === 0}
           className="w-full bg-gradient-to-r from-amber-500 to-amber-600 text-white px-8 py-4 rounded-lg font-bold shadow-md hover:from-amber-600 hover:to-amber-700 transform hover:scale-[1.02] transition-all duration-200 disabled:from-gray-400 disabled:to-gray-500 disabled:cursor-not-allowed disabled:hover:scale-100 text-lg"
         >
           {isLoading

@@ -14,14 +14,23 @@ export type StripeCheckoutMetaData = {
   userId: string;
   waitingListId: Id<"waitingList">;
   ticketTypeId?: Id<"ticketTypes">;
+  cart?: Array<{
+    ticketTypeId: Id<"ticketTypes">;
+    quantity: number;
+  }>;
 };
 
 export async function createStripeCheckoutSession({
   eventId,
   ticketTypeId,
+  cart,
 }: {
   eventId: Id<"events">;
   ticketTypeId?: Id<"ticketTypes">;
+  cart?: Array<{
+    ticketTypeId: Id<"ticketTypes">;
+    quantity: number;
+  }>;
 }) {
   const { userId } = await auth();
   if (!userId) throw new Error("Not authenticated");
@@ -57,13 +66,50 @@ export async function createStripeCheckoutSession({
     throw new Error("Ticket offer has no expiration date");
   }
 
-  // Get ticket type information if provided
-  let ticketPrice = event.price;
-  let ticketCurrency = event.currency || "NOK";
-  let ticketTypeData = null;
+  // Handle cart or single ticket type
+  const lineItems: Array<{
+    price_data: {
+      currency: string;
+      product_data: { name: string; description?: string };
+      unit_amount: number;
+    };
+    quantity: number;
+  }> = [];
+  let totalAmount = 0;
 
-  if (ticketTypeId) {
-    ticketTypeData = await convex.query(api.ticketTypes.getTicketTypeWithAvailability, {
+  if (cart && cart.length > 0) {
+    // Bulk purchase - create line items for each cart item
+    for (const cartItem of cart) {
+      const ticketTypeData = await convex.query(api.ticketTypes.getTicketTypeWithAvailability, {
+        ticketTypeId: cartItem.ticketTypeId,
+      });
+
+      if (!ticketTypeData) {
+        throw new Error(`Ticket type not found: ${cartItem.ticketTypeId}`);
+      }
+
+      if (ticketTypeData.availableQuantity < cartItem.quantity) {
+        throw new Error(`Not enough tickets available for ${ticketTypeData.name}`);
+      }
+
+      const itemTotal = ticketTypeData.price * cartItem.quantity;
+      totalAmount += itemTotal;
+
+      lineItems.push({
+        price_data: {
+          currency: getStripeCurrencyCode(safeCurrencyCode(ticketTypeData.currency)),
+          product_data: {
+            name: `${event.name} - ${ticketTypeData.name}`,
+            description: ticketTypeData.description || event.description,
+          },
+          unit_amount: ticketTypeData.price,
+        },
+        quantity: cartItem.quantity,
+      });
+    }
+  } else if (ticketTypeId) {
+    // Single ticket purchase (backward compatibility)
+    const ticketTypeData = await convex.query(api.ticketTypes.getTicketTypeWithAvailability, {
       ticketTypeId,
     });
 
@@ -75,36 +121,51 @@ export async function createStripeCheckoutSession({
       throw new Error("Selected ticket type is sold out");
     }
 
-    ticketPrice = ticketTypeData.price / 100; // Convert from øre to currency units
-    ticketCurrency = ticketTypeData.currency;
+    totalAmount = ticketTypeData.price;
+
+    lineItems.push({
+      price_data: {
+        currency: getStripeCurrencyCode(safeCurrencyCode(ticketTypeData.currency)),
+        product_data: {
+          name: ticketTypeData ? `${event.name} - ${ticketTypeData.name}` : event.name,
+          description: ticketTypeData?.description || event.description,
+        },
+        unit_amount: ticketTypeData.price,
+      },
+      quantity: 1,
+    });
+  } else {
+    // Fallback to event price (should not happen with new system)
+    totalAmount = event.price;
+
+    lineItems.push({
+      price_data: {
+        currency: getStripeCurrencyCode(safeCurrencyCode(event.currency)),
+        product_data: {
+          name: event.name,
+          description: event.description,
+        },
+        unit_amount: Math.round(event.price * 100),
+      },
+      quantity: 1,
+    });
   }
 
-  const metadata: StripeCheckoutMetaData = {
+  const metadata = {
     eventId,
     userId,
     waitingListId: queuePosition._id,
-    ticketTypeId,
+    ticketTypeId: ticketTypeId || null,
+    cart: cart ? JSON.stringify(cart) : null,
   };
 
   // Create Stripe Checkout Session
   const session = await stripe.checkout.sessions.create(
     {
       payment_method_types: ["card"],
-      line_items: [
-        {
-          price_data: {
-            currency: getStripeCurrencyCode(safeCurrencyCode(ticketCurrency)),
-            product_data: {
-              name: ticketTypeData ? `${event.name} - ${ticketTypeData.name}` : event.name,
-              description: ticketTypeData?.description || event.description,
-            },
-            unit_amount: Math.round(ticketPrice * 100),
-          },
-          quantity: 1,
-        },
-      ],
+      line_items: lineItems,
       payment_intent_data: {
-        application_fee_amount: Math.round(ticketPrice * 100 * 0.01),
+        application_fee_amount: Math.round(totalAmount * 0.01),
       },
       expires_at: Math.floor(Date.now() / 1000) + DURATIONS.TICKET_OFFER / 1000, // 30 minutes (stripe checkout minimum expiration time)
       mode: "payment",
