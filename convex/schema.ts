@@ -26,11 +26,29 @@ export default defineSchema({
     paymentIntentId: v.optional(v.string()),
     amount: v.optional(v.number()),
     isVip: v.optional(v.boolean()),
+    scannedAt: v.optional(v.number()),
+    scannedBy: v.optional(v.string()),
   })
     .index("by_event", ["eventId"])
     .index("by_user", ["userId"])
     .index("by_user_event", ["userId", "eventId"])
     .index("by_payment_intent", ["paymentIntentId"]),
+
+  ticketScans: defineTable({
+    ticketId: v.id("tickets"),
+    eventId: v.id("events"),
+    scannedBy: v.string(),
+    scannedAt: v.number(),
+    scanResult: v.union(
+      v.literal("valid"),
+      v.literal("already_scanned"),
+      v.literal("invalid"),
+      v.literal("cancelled")
+    ),
+  })
+    .index("by_ticket", ["ticketId"])
+    .index("by_event", ["eventId"])
+    .index("by_scanned_by", ["scannedBy"]),
 
   waitingList: defineTable({
     eventId: v.id("events"),
@@ -58,4 +76,19 @@ export default defineSchema({
   })
     .index("by_user_id", ["userId"])
     .index("by_email", ["email"]),
+
+  scanners: defineTable({
+    eventId: v.id("events"),
+    name: v.string(),
+    email: v.string(),
+    phone: v.optional(v.string()),
+    accessCode: v.string(), // Unik kode for å scanne
+    isActive: v.boolean(),
+    createdBy: v.string(), // Arrangør som opprettet scanneren
+    createdAt: v.number(),
+    lastUsedAt: v.optional(v.number()),
+  })
+    .index("by_event", ["eventId"])
+    .index("by_access_code", ["accessCode"])
+    .index("by_created_by", ["createdBy"]),
 });

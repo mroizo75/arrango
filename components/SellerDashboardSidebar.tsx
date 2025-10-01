@@ -10,12 +10,14 @@ import {
   Megaphone,
   Settings,
   PlusCircle,
+  ScanLine,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { SignedIn, UserButton } from "@clerk/nextjs";
 
 const NAV_ITEMS = [
   { name: "Oversikt", href: "/seller", icon: LayoutDashboard },
+  { name: "Scan billetter", href: "/seller/scan", icon: ScanLine },
   { name: "Billetter", href: "/seller/tickets", icon: Ticket },
   { name: "Kunder", href: "/seller/customers", icon: Users },
   { name: "Markedsføring", href: "/seller/marketing", icon: Megaphone },
