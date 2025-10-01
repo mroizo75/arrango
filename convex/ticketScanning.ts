@@ -88,7 +88,7 @@ export const scanTicket = mutation({
       await ctx.db.insert("ticketScans", {
         ticketId: args.ticketId,
         eventId: ticket.eventId,
-        scannedBy: userId,
+        scannedBy: scannerId,
         scannedAt: Date.now(),
         scanResult: "cancelled",
       });
