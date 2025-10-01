@@ -11,6 +11,7 @@ import JoinQueue from "@/components/JoinQueue";
 import { SignInButton, useUser } from "@clerk/nextjs";
 import { useStorageUrl } from "@/lib/hooks";
 import { formatPrice, safeCurrencyCode } from "@/lib/currency";
+import Link from "next/link";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 
@@ -22,6 +23,9 @@ export default function EventPage() {
   });
   const availability = useQuery(api.events.getEventAvailability, {
     eventId: params.id as Id<"events">,
+  });
+  const organizer = useQuery(api.organizerProfile.getOrganizerProfileByUserId, {
+    userId: event?.userId ?? "",
   });
   const imageUrl = useStorageUrl(event?.imageStorageId);
 
@@ -57,7 +61,19 @@ export default function EventPage() {
                   <h1 className="text-4xl font-bold text-gray-900 mb-4">
                     {event.name}
                   </h1>
-                  <p className="text-lg text-gray-600">{event.description}</p>
+                  <p className="text-lg text-gray-600 mb-4">{event.description}</p>
+
+                  {organizer?.organizerSlug && (
+                    <div className="flex items-center gap-2 text-sm text-gray-600">
+                      <span>Arrangør:</span>
+                      <Link
+                        href={`/organizer/${organizer.organizerSlug}`}
+                        className="text-blue-600 hover:underline font-medium"
+                      >
+                        {organizer.organizerName}
+                      </Link>
+                    </div>
+                  )}
                 </div>
 
                 <div className="grid grid-cols-2 gap-6">

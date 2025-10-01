@@ -14,6 +14,7 @@ import QRCode from "react-qr-code";
 import Spinner from "./Spinner";
 import { useStorageUrl } from "@/lib/hooks";
 import { formatPrice, safeCurrencyCode } from "@/lib/currency";
+import Link from "next/link";
 import Image from "next/image";
 
 export default function Ticket({ ticketId }: { ticketId: Id<"tickets"> }) {
@@ -173,7 +174,16 @@ export default function Ticket({ ticketId }: { ticketId: Id<"tickets"> }) {
           <div>
             <p className="text-xs text-gray-500">Arrangør</p>
             <p className="text-sm font-medium">
-              {organizerProfile?.organizerName || "Arrango"}
+              {organizerProfile?.organizerSlug ? (
+                <Link
+                  href={`/organizer/${organizerProfile.organizerSlug}`}
+                  className="text-blue-600 hover:underline"
+                >
+                  {organizerProfile.organizerName || "Arrango"}
+                </Link>
+              ) : (
+                organizerProfile?.organizerName || "Arrango"
+              )}
             </p>
           </div>
         </div>
