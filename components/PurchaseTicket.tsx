@@ -19,6 +19,11 @@ export default function PurchaseTicket({ eventId }: { eventId: Id<"events"> }) {
     userId: user?.id ?? "",
   });
 
+  const userTicket = useQuery(api.tickets.getUserTicketForEvent, {
+    eventId,
+    userId: user?.id ?? "",
+  });
+
   const [timeRemaining, setTimeRemaining] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [cart, setCart] = useState<Array<{
@@ -109,17 +114,21 @@ export default function PurchaseTicket({ eventId }: { eventId: Id<"events"> }) {
               </div>
               <div>
                 <h3 className="text-lg font-semibold text-gray-900">
-                  Ticket Reserved
+                  {userTicket ? "Kjøp flere billetter" : "Ticket Reserved"}
                 </h3>
-                <p className="text-sm text-gray-500">
-                  Expires in {timeRemaining}
-                </p>
+                {!userTicket && (
+                  <p className="text-sm text-gray-500">
+                    Expires in {timeRemaining}
+                  </p>
+                )}
               </div>
             </div>
 
             <div className="text-sm text-gray-600 leading-relaxed">
-              A ticket has been reserved for you. Complete your purchase before
-              the timer expires to secure your spot at this event.
+              {userTicket
+                ? "Du har allerede en billett til dette arrangementet. Ønsker du å kjøpe flere billetter?"
+                : "A ticket has been reserved for you. Complete your purchase before the timer expires to secure your spot at this event."
+              }
             </div>
           </div>
         </div>
@@ -140,6 +149,8 @@ export default function PurchaseTicket({ eventId }: { eventId: Id<"events"> }) {
         >
           {isLoading
             ? "Redirecting to checkout..."
+            : userTicket
+            ? "Kjøp flere billetter nå →"
             : "Purchase Your Ticket Now →"}
         </button>
 
