@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useStorageUrl } from "@/lib/hooks";
+import { formatPrice, safeCurrencyCode } from "@/lib/currency";
 import Image from "next/image";
 import CancelEventButton from "./CancelEventButton";
 import { Doc } from "@/convex/_generated/dataModel";
@@ -158,10 +159,9 @@ function SellerEventCard({
                   </span>
                 </div>
                 <p className="text-2xl font-semibold text-gray-900">
-                  £
                   {event.is_cancelled
-                    ? event.metrics.refundedTickets * event.price
-                    : event.metrics.revenue}
+                    ? formatPrice(event.metrics.refundedTickets * event.price, safeCurrencyCode(event.currency))
+                    : formatPrice(event.metrics.revenue, safeCurrencyCode(event.currency))}
                 </p>
               </div>
 

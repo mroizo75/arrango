@@ -13,11 +13,14 @@ import {
   XCircle,
   PencilIcon,
   StarIcon,
+  User,
 } from "lucide-react";
 import { useUser } from "@clerk/nextjs";
 import PurchaseTicket from "./PurchaseTicket";
 import { useRouter } from "next/navigation";
 import { useStorageUrl } from "@/lib/hooks";
+import { formatPrice, safeCurrencyCode } from "@/lib/currency";
+import Link from "next/link";
 import Image from "next/image";
 
 export default function EventCard({ eventId }: { eventId: Id<"events"> }) {
@@ -28,6 +31,9 @@ export default function EventCard({ eventId }: { eventId: Id<"events"> }) {
   const userTicket = useQuery(api.tickets.getUserTicketForEvent, {
     eventId,
     userId: user?.id ?? "",
+  });
+  const organizer = useQuery(api.organizerProfile.getOrganizerProfileByUserId, {
+    userId: event?.userId ?? "",
   });
   const queuePosition = useQuery(api.waitingList.getQueuePosition, {
     eventId,
@@ -198,7 +204,7 @@ export default function EventCard({ eventId }: { eventId: Id<"events"> }) {
                   : "bg-green-50 text-green-700"
               }`}
             >
-              £{event.price.toFixed(2)}
+{formatPrice(event.price, safeCurrencyCode(event.currency))}
             </span>
             {availability.purchasedCount >= availability.totalTickets && (
               <span className="px-4 py-1.5 bg-red-50 text-red-700 font-semibold rounded-full text-sm">
@@ -221,6 +227,22 @@ export default function EventCard({ eventId }: { eventId: Id<"events"> }) {
               {isPastEvent && "(Ended)"}
             </span>
           </div>
+
+          {organizer?.organizerSlug && (
+            <div className="flex items-center text-gray-600">
+              <User className="w-4 h-4 mr-2" />
+              <span>
+                Arrangør:{" "}
+                <Link
+                  href={`/organizer/${organizer.organizerSlug}`}
+                  className="text-blue-600 hover:underline"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  {organizer.organizerName}
+                </Link>
+              </span>
+            </div>
+          )}
 
           <div className="flex items-center text-gray-600">
             <Ticket className="w-4 h-4 mr-2" />

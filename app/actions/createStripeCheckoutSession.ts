@@ -2,6 +2,7 @@
 
 import { stripe } from "@/lib/stripe";
 import { getConvexClient } from "@/lib/convex";
+import { getStripeCurrencyCode, safeCurrencyCode } from "@/lib/currency";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import baseUrl from "@/lib/baseUrl";
@@ -66,7 +67,7 @@ export async function createStripeCheckoutSession({
       line_items: [
         {
           price_data: {
-            currency: "gbp",
+            currency: getStripeCurrencyCode(safeCurrencyCode(event.currency)),
             product_data: {
               name: event.name,
               description: event.description,

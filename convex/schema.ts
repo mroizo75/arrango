@@ -8,6 +8,7 @@ export default defineSchema({
     location: v.string(),
     eventDate: v.number(),
     price: v.number(),
+    currency: v.optional(v.string()), // ISO currency code: "NOK", "GBP", "USD", etc.
     totalTickets: v.number(),
     userId: v.string(),
     imageStorageId: v.optional(v.id("_storage")),
@@ -73,9 +74,26 @@ export default defineSchema({
     organizerLogoStorageId: v.optional(v.id("_storage")),
     organizerName: v.optional(v.string()),
     organizerWebsite: v.optional(v.string()),
+    organizerBio: v.optional(v.string()),
+    organizerDescription: v.optional(v.string()),
+    organizerPhone: v.optional(v.string()),
+    organizerAddress: v.optional(v.string()),
+    organizerCity: v.optional(v.string()),
+    organizerCountry: v.optional(v.string()),
+    organizerFacebook: v.optional(v.string()),
+    organizerInstagram: v.optional(v.string()),
+    organizerTwitter: v.optional(v.string()),
+    organizerLinkedIn: v.optional(v.string()),
+    organizerSlug: v.optional(v.string()), // Unique slug for public profile URL
+    organizerVerified: v.optional(v.boolean()), // Verified organizer badge
+    organizerRating: v.optional(v.number()), // Average rating 1-5
+    organizerReviewCount: v.optional(v.number()), // Number of reviews
+    organizerEventCount: v.optional(v.number()), // Total events created
+    organizerFollowerCount: v.optional(v.number()), // Social proof
   })
     .index("by_user_id", ["userId"])
-    .index("by_email", ["email"]),
+    .index("by_email", ["email"])
+    .index("by_organizer_slug", ["organizerSlug"]),
 
   scanners: defineTable({
     eventId: v.id("events"),

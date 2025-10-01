@@ -17,6 +17,7 @@ import { toggleTicketVip } from "@/app/actions/toggleTicketVip";
 
 type TicketRow = {
   ticketId: string;
+  userId: string;
   eventName: string;
   customerName: string;
   customerEmail: string;

@@ -14,6 +14,13 @@ import {
 import { z } from "zod";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useUser } from "@clerk/nextjs";
 import { useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
@@ -24,6 +31,7 @@ import { Id } from "@/convex/_generated/dataModel";
 import { Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useStorageUrl } from "@/lib/hooks";
+import { CURRENCIES, detectCurrencyFromLocation, safeCurrencyCode, CurrencyCode } from "@/lib/currency";
 
 const formSchema = z.object({
   name: z.string().min(1, "Event name is required"),
@@ -35,6 +43,7 @@ const formSchema = z.object({
       new Date(new Date().setHours(0, 0, 0, 0)),
       "Event date must be in the future"
     ),
+  currency: z.string().optional(),
   price: z.number().min(0, "Price must be 0 or greater"),
   totalTickets: z.number().min(1, "Must have at least 1 ticket"),
 });
@@ -47,6 +56,7 @@ interface InitialEventData {
   description: string;
   location: string;
   eventDate: number;
+  currency?: string;
   price: number;
   totalTickets: number;
   imageStorageId?: Id<"_storage">;
@@ -83,6 +93,7 @@ export default function EventForm({ mode, initialData }: EventFormProps) {
       description: initialData?.description ?? "",
       location: initialData?.location ?? "",
       eventDate: initialData ? new Date(initialData.eventDate) : new Date(),
+      currency: initialData?.currency ? safeCurrencyCode(initialData.currency) : detectCurrencyFromLocation(initialData?.location ?? ""),
       price: initialData?.price ?? 0,
       totalTickets: initialData?.totalTickets ?? 1,
     },
@@ -274,26 +285,56 @@ export default function EventForm({ mode, initialData }: EventFormProps) {
 
           <FormField
             control={form.control}
-            name="price"
+            name="currency"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Price per Ticket</FormLabel>
-                <FormControl>
-                  <div className="relative">
-                    <span className="absolute left-2 top-1/2 -translate-y-1/2">
-                      £
-                    </span>
-                    <Input
-                      type="number"
-                      {...field}
-                      onChange={(e) => field.onChange(Number(e.target.value))}
-                      className="pl-6"
-                    />
-                  </div>
-                </FormControl>
+                <FormLabel>Currency</FormLabel>
+                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select currency" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {Object.values(CURRENCIES).map((currency) => (
+                      <SelectItem key={currency.code} value={currency.code}>
+                        {currency.symbol} {currency.name} ({currency.code})
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
                 <FormMessage />
               </FormItem>
             )}
+          />
+
+          <FormField
+            control={form.control}
+            name="price"
+            render={({ field }) => {
+              const selectedCurrency = form.watch("currency");
+              const currencySymbol = selectedCurrency ? CURRENCIES[selectedCurrency as CurrencyCode]?.symbol || "kr" : "kr";
+
+              return (
+                <FormItem>
+                  <FormLabel>Price per Ticket</FormLabel>
+                  <FormControl>
+                    <div className="relative">
+                      <span className="absolute left-2 top-1/2 -translate-y-1/2">
+                        {currencySymbol}
+                      </span>
+                      <Input
+                        type="number"
+                        {...field}
+                        onChange={(e) => field.onChange(Number(e.target.value))}
+                        className="pl-6"
+                      />
+                    </div>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              );
+            }}
           />
 
           <FormField

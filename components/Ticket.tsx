@@ -13,6 +13,7 @@ import {
 import QRCode from "react-qr-code";
 import Spinner from "./Spinner";
 import { useStorageUrl } from "@/lib/hooks";
+import { formatPrice, safeCurrencyCode } from "@/lib/currency";
 import Image from "next/image";
 
 export default function Ticket({ ticketId }: { ticketId: Id<"tickets"> }) {
@@ -117,7 +118,7 @@ export default function Ticket({ ticketId }: { ticketId: Id<"tickets"> }) {
               />
               <div>
                 <p className="text-sm text-gray-500">Ticket Price</p>
-                <p className="font-medium">£{ticket.event.price.toFixed(2)}</p>
+                <p className="font-medium">{formatPrice(ticket.event.price, safeCurrencyCode(ticket.event.currency))}</p>
               </div>
             </div>
           </div>

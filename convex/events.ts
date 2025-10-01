@@ -45,6 +45,7 @@ export const create = mutation({
     description: v.string(),
     location: v.string(),
     eventDate: v.number(), // Store as timestamp
+    currency: v.optional(v.string()),
     price: v.number(),
     totalTickets: v.number(),
     userId: v.string(),
@@ -55,6 +56,7 @@ export const create = mutation({
       description: args.description,
       location: args.location,
       eventDate: args.eventDate,
+      currency: args.currency,
       price: args.price,
       totalTickets: args.totalTickets,
       userId: args.userId,
@@ -432,6 +434,7 @@ export const updateEvent = mutation({
     description: v.string(),
     location: v.string(),
     eventDate: v.number(),
+    currency: v.optional(v.string()),
     price: v.number(),
     totalTickets: v.number(),
   },

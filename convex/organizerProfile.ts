@@ -6,6 +6,17 @@ export const updateOrganizerProfile = mutation({
     organizerName: v.optional(v.string()),
     organizerWebsite: v.optional(v.string()),
     organizerLogoStorageId: v.optional(v.id("_storage")),
+    organizerBio: v.optional(v.string()),
+    organizerDescription: v.optional(v.string()),
+    organizerPhone: v.optional(v.string()),
+    organizerAddress: v.optional(v.string()),
+    organizerCity: v.optional(v.string()),
+    organizerCountry: v.optional(v.string()),
+    organizerFacebook: v.optional(v.string()),
+    organizerInstagram: v.optional(v.string()),
+    organizerTwitter: v.optional(v.string()),
+    organizerLinkedIn: v.optional(v.string()),
+    organizerSlug: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     const identity = await ctx.auth.getUserIdentity();
@@ -49,11 +60,50 @@ export const updateOrganizerProfile = mutation({
       }
     }
 
-    // Update organizer profile
+    // Generate unique slug if name provided and no slug exists
+    let slug = args.organizerSlug || user.organizerSlug;
+    if (args.organizerName && !slug) {
+      const baseSlug = args.organizerName
+        .toLowerCase()
+        .replace(/[^a-z0-9\s-]/g, '') // Remove special chars
+        .replace(/\s+/g, '-') // Replace spaces with hyphens
+        .replace(/-+/g, '-') // Replace multiple hyphens with single
+        .trim();
+
+      // Ensure unique slug
+      let finalSlug = baseSlug;
+      let counter = 1;
+      while (true) {
+        const existingUser = await ctx.db
+          .query("users")
+          .withIndex("by_organizer_slug", (q) => q.eq("organizerSlug", finalSlug))
+          .first();
+
+        if (!existingUser || existingUser._id === user._id) {
+          break;
+        }
+        finalSlug = `${baseSlug}-${counter}`;
+        counter++;
+      }
+      slug = finalSlug;
+    }
+
+    // Update organizer profile with all new fields
     await ctx.db.patch(user._id, {
       organizerName: args.organizerName,
       organizerWebsite: args.organizerWebsite,
       organizerLogoStorageId: args.organizerLogoStorageId,
+      organizerBio: args.organizerBio,
+      organizerDescription: args.organizerDescription,
+      organizerPhone: args.organizerPhone,
+      organizerAddress: args.organizerAddress,
+      organizerCity: args.organizerCity,
+      organizerCountry: args.organizerCountry,
+      organizerFacebook: args.organizerFacebook,
+      organizerInstagram: args.organizerInstagram,
+      organizerTwitter: args.organizerTwitter,
+      organizerLinkedIn: args.organizerLinkedIn,
+      organizerSlug: slug,
     });
 
     return { success: true };
@@ -93,6 +143,22 @@ export const getOrganizerProfile = query({
       organizerName: user.organizerName,
       organizerWebsite: user.organizerWebsite,
       organizerLogoStorageId: user.organizerLogoStorageId,
+      organizerBio: user.organizerBio,
+      organizerDescription: user.organizerDescription,
+      organizerPhone: user.organizerPhone,
+      organizerAddress: user.organizerAddress,
+      organizerCity: user.organizerCity,
+      organizerCountry: user.organizerCountry,
+      organizerFacebook: user.organizerFacebook,
+      organizerInstagram: user.organizerInstagram,
+      organizerTwitter: user.organizerTwitter,
+      organizerLinkedIn: user.organizerLinkedIn,
+      organizerSlug: user.organizerSlug,
+      organizerVerified: user.organizerVerified,
+      organizerRating: user.organizerRating,
+      organizerReviewCount: user.organizerReviewCount,
+      organizerEventCount: user.organizerEventCount,
+      organizerFollowerCount: user.organizerFollowerCount,
     };
   },
 });
@@ -108,9 +174,114 @@ export const getOrganizerProfileByUserId = query({
     if (!user) return null;
 
     return {
+      userId: user.userId,
       organizerName: user.organizerName ?? user.name,
       organizerWebsite: user.organizerWebsite,
       organizerLogoStorageId: user.organizerLogoStorageId,
+      organizerBio: user.organizerBio,
+      organizerDescription: user.organizerDescription,
+      organizerPhone: user.organizerPhone,
+      organizerAddress: user.organizerAddress,
+      organizerCity: user.organizerCity,
+      organizerCountry: user.organizerCountry,
+      organizerFacebook: user.organizerFacebook,
+      organizerInstagram: user.organizerInstagram,
+      organizerTwitter: user.organizerTwitter,
+      organizerLinkedIn: user.organizerLinkedIn,
+      organizerSlug: user.organizerSlug,
+      organizerVerified: user.organizerVerified,
+      organizerRating: user.organizerRating,
+      organizerReviewCount: user.organizerReviewCount,
+      organizerEventCount: user.organizerEventCount,
+      organizerFollowerCount: user.organizerFollowerCount,
     };
+  },
+});
+
+export const getOrganizerProfileBySlug = query({
+  args: { slug: v.string() },
+  handler: async (ctx, args) => {
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_organizer_slug", (q) => q.eq("organizerSlug", args.slug))
+      .first();
+
+    if (!user) return null;
+
+    return {
+      userId: user.userId,
+      organizerName: user.organizerName ?? user.name,
+      organizerWebsite: user.organizerWebsite,
+      organizerLogoStorageId: user.organizerLogoStorageId,
+      organizerBio: user.organizerBio,
+      organizerDescription: user.organizerDescription,
+      organizerPhone: user.organizerPhone,
+      organizerAddress: user.organizerAddress,
+      organizerCity: user.organizerCity,
+      organizerCountry: user.organizerCountry,
+      organizerFacebook: user.organizerFacebook,
+      organizerInstagram: user.organizerInstagram,
+      organizerTwitter: user.organizerTwitter,
+      organizerLinkedIn: user.organizerLinkedIn,
+      organizerSlug: user.organizerSlug,
+      organizerVerified: user.organizerVerified,
+      organizerRating: user.organizerRating,
+      organizerReviewCount: user.organizerReviewCount,
+      organizerEventCount: user.organizerEventCount,
+      organizerFollowerCount: user.organizerFollowerCount,
+    };
+  },
+});
+
+export const getOrganizerEvents = query({
+  args: { userId: v.string() },
+  handler: async (ctx, args) => {
+    // Get all events for this organizer
+    const events = await ctx.db
+      .query("events")
+      .filter((q) => q.eq(q.field("userId"), args.userId))
+      .collect();
+
+    // Sort by date (upcoming first)
+    const now = Date.now();
+    const sortedEvents = events.sort((a, b) => {
+      const aDate = a.eventDate;
+      const bDate = b.eventDate;
+
+      // Both upcoming: sort by date ascending
+      if (aDate >= now && bDate >= now) {
+        return aDate - bDate;
+      }
+      // Both past: sort by date descending
+      if (aDate < now && bDate < now) {
+        return bDate - aDate;
+      }
+      // One upcoming, one past: upcoming first
+      return aDate >= now ? -1 : 1;
+    });
+
+    // Add availability info for each event
+    const eventsWithAvailability = await Promise.all(
+      sortedEvents.map(async (event) => {
+        const tickets = await ctx.db
+          .query("tickets")
+          .withIndex("by_event", (q) => q.eq("eventId", event._id))
+          .collect();
+
+        const purchasedCount = tickets.filter(t => t.status === "valid" || t.status === "used").length;
+
+        return {
+          ...event,
+          availability: {
+            totalTickets: event.totalTickets,
+            purchasedCount,
+            availableCount: event.totalTickets - purchasedCount,
+            isSoldOut: purchasedCount >= event.totalTickets,
+          },
+        };
+      })
+    );
+
+    return eventsWithAvailability;
   },
 });
