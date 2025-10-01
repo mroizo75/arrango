@@ -12,10 +12,10 @@ import {
 import { Input } from "@/components/ui/input";
 
 type Customer = {
+  userId: string;
   name: string;
   email: string;
-  phone: string;
-  eventName: string;
+  phone?: string;
 };
 
 type CustomerListTableProps = {
@@ -33,15 +33,14 @@ export function CustomerListTable({ customers }: CustomerListTableProps) {
       (customer) =>
         customer.name.toLowerCase().includes(query) ||
         customer.email.toLowerCase().includes(query) ||
-        customer.phone.toLowerCase().includes(query) ||
-        customer.eventName.toLowerCase().includes(query)
+        (customer.phone && customer.phone.toLowerCase().includes(query))
     );
   }, [customers, searchQuery]);
 
   return (
     <div className="space-y-4">
       <Input
-        placeholder="Søk etter kunde (navn, e-post, telefon, event)..."
+        placeholder="Søk etter kunde (navn, e-post, telefon)..."
         className="max-w-sm"
         value={searchQuery}
         onChange={(e) => setSearchQuery(e.target.value)}
@@ -54,13 +53,12 @@ export function CustomerListTable({ customers }: CustomerListTableProps) {
               <TableHead>Navn</TableHead>
               <TableHead>E-post</TableHead>
               <TableHead>Telefonnummer</TableHead>
-              <TableHead>Event</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {filteredCustomers.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={4} className="text-center text-muted-foreground">
+                <TableCell colSpan={3} className="text-center text-muted-foreground">
                   {searchQuery ? "Ingen kunder matcher søket" : "Ingen kunder funnet"}
                 </TableCell>
               </TableRow>
@@ -69,10 +67,7 @@ export function CustomerListTable({ customers }: CustomerListTableProps) {
                 <TableRow key={`${customer.email}-${idx}`}>
                   <TableCell className="font-medium">{customer.name}</TableCell>
                   <TableCell>{customer.email}</TableCell>
-                  <TableCell>{customer.phone}</TableCell>
-                  <TableCell className="text-muted-foreground">
-                    {customer.eventName}
-                  </TableCell>
+                  <TableCell>{customer.phone || "-"}</TableCell>
                 </TableRow>
               ))
             )}

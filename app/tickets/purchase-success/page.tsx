@@ -2,9 +2,7 @@ import { getConvexClient } from "@/lib/convex";
 import { api } from "@/convex/_generated/api";
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
-import { stripe } from "@/lib/stripe";
 import Ticket from "@/components/Ticket";
-import { Id } from "@/convex/_generated/dataModel";
 
 async function TicketSuccess({
   searchParams,

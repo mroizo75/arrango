@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
+import { Id } from "@/convex/_generated/dataModel";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -18,14 +19,14 @@ export function OrganizerProfileForm() {
 
   const [organizerName, setOrganizerName] = useState("");
   const [organizerWebsite, setOrganizerWebsite] = useState("");
-  const [logoStorageId, setLogoStorageId] = useState<string | undefined>();
+  const [logoStorageId, setLogoStorageId] = useState<Id<"_storage"> | undefined>();
   const [isUploading, setIsUploading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
-  const logoUrl = useStorageUrl(logoStorageId as any);
+  const logoUrl = useStorageUrl(logoStorageId);
 
   // Debug logging
   console.log("Profile data:", profile);
@@ -66,7 +67,7 @@ export function OrganizerProfileForm() {
       if (!result.ok) throw new Error("Opplasting feilet");
 
       const { storageId } = await result.json();
-      setLogoStorageId(storageId);
+      setLogoStorageId(storageId as Id<"_storage">);
 
       toast({
         title: "Logo lastet opp",
@@ -92,7 +93,7 @@ export function OrganizerProfileForm() {
       await updateProfile({
         organizerName: organizerName || undefined,
         organizerWebsite: organizerWebsite || undefined,
-        organizerLogoStorageId: logoStorageId as any,
+        organizerLogoStorageId: logoStorageId,
       });
 
       toast({
