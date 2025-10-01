@@ -16,6 +16,7 @@ export default defineSchema({
   }),
   tickets: defineTable({
     eventId: v.id("events"),
+    ticketTypeId: v.optional(v.id("ticketTypes")), // Reference to ticket type (optional for backward compatibility)
     userId: v.string(),
     purchasedAt: v.number(),
     status: v.union(
@@ -25,12 +26,13 @@ export default defineSchema({
       v.literal("cancelled")
     ),
     paymentIntentId: v.optional(v.string()),
-    amount: v.optional(v.number()),
-    isVip: v.optional(v.boolean()),
+    amount: v.number(), // Price at time of purchase (in øre)
+    currency: v.optional(v.string()), // Currency at time of purchase (optional for backward compatibility)
     scannedAt: v.optional(v.number()),
     scannedBy: v.optional(v.string()),
   })
     .index("by_event", ["eventId"])
+    .index("by_ticket_type", ["ticketTypeId"])
     .index("by_user", ["userId"])
     .index("by_user_event", ["userId", "eventId"])
     .index("by_payment_intent", ["paymentIntentId"]),
@@ -50,6 +52,21 @@ export default defineSchema({
     .index("by_ticket", ["ticketId"])
     .index("by_event", ["eventId"])
     .index("by_scanned_by", ["scannedBy"]),
+
+  ticketTypes: defineTable({
+    eventId: v.id("events"),
+    name: v.string(), // "VIP", "Early Bird", "Standing", "Seated", etc.
+    description: v.optional(v.string()),
+    price: v.number(), // Price in øre (cents)
+    currency: v.string(), // ISO currency code
+    maxQuantity: v.number(), // Maximum tickets available for this type
+    soldQuantity: v.number(), // How many have been sold (default 0)
+    sortOrder: v.number(), // For ordering in UI (lower numbers first)
+    isActive: v.boolean(), // Can be deactivated
+    benefits: v.optional(v.array(v.string())), // ["VIP access", "Free drink", etc.]
+  })
+    .index("by_event", ["eventId"])
+    .index("by_event_active", ["eventId", "isActive"]),
 
   waitingList: defineTable({
     eventId: v.id("events"),

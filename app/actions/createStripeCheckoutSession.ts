@@ -13,12 +13,15 @@ export type StripeCheckoutMetaData = {
   eventId: Id<"events">;
   userId: string;
   waitingListId: Id<"waitingList">;
+  ticketTypeId?: Id<"ticketTypes">;
 };
 
 export async function createStripeCheckoutSession({
   eventId,
+  ticketTypeId,
 }: {
   eventId: Id<"events">;
+  ticketTypeId?: Id<"ticketTypes">;
 }) {
   const { userId } = await auth();
   if (!userId) throw new Error("Not authenticated");
@@ -54,10 +57,33 @@ export async function createStripeCheckoutSession({
     throw new Error("Ticket offer has no expiration date");
   }
 
+  // Get ticket type information if provided
+  let ticketPrice = event.price;
+  let ticketCurrency = event.currency || "NOK";
+  let ticketTypeData = null;
+
+  if (ticketTypeId) {
+    ticketTypeData = await convex.query(api.ticketTypes.getTicketTypeWithAvailability, {
+      ticketTypeId,
+    });
+
+    if (!ticketTypeData) {
+      throw new Error("Ticket type not found");
+    }
+
+    if (ticketTypeData.isSoldOut) {
+      throw new Error("Selected ticket type is sold out");
+    }
+
+    ticketPrice = ticketTypeData.price / 100; // Convert from øre to currency units
+    ticketCurrency = ticketTypeData.currency;
+  }
+
   const metadata: StripeCheckoutMetaData = {
     eventId,
     userId,
     waitingListId: queuePosition._id,
+    ticketTypeId,
   };
 
   // Create Stripe Checkout Session
@@ -67,18 +93,18 @@ export async function createStripeCheckoutSession({
       line_items: [
         {
           price_data: {
-            currency: getStripeCurrencyCode(safeCurrencyCode(event.currency)),
+            currency: getStripeCurrencyCode(safeCurrencyCode(ticketCurrency)),
             product_data: {
-              name: event.name,
-              description: event.description,
+              name: ticketTypeData ? `${event.name} - ${ticketTypeData.name}` : event.name,
+              description: ticketTypeData?.description || event.description,
             },
-            unit_amount: Math.round(event.price * 100),
+            unit_amount: Math.round(ticketPrice * 100),
           },
           quantity: 1,
         },
       ],
       payment_intent_data: {
-        application_fee_amount: Math.round(event.price * 100 * 0.01),
+        application_fee_amount: Math.round(ticketPrice * 100 * 0.01),
       },
       expires_at: Math.floor(Date.now() / 1000) + DURATIONS.TICKET_OFFER / 1000, // 30 minutes (stripe checkout minimum expiration time)
       mode: "payment",

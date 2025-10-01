@@ -24,7 +24,7 @@ type TicketData = {
   amount: string;
   status: string;
   purchasedAt: number;
-  isVip: boolean;
+  ticketTypeName: string;
 };
 
 type TicketsQueryResult = {

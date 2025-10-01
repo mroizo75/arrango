@@ -11,9 +11,6 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Switch } from "@/components/ui/switch";
-import { useTransition } from "react";
-import { toggleTicketVip } from "@/app/actions/toggleTicketVip";
 
 type TicketRow = {
   ticketId: string;
@@ -24,7 +21,7 @@ type TicketRow = {
   amount: string;
   status: string;
   purchasedAt: number;
-  isVip: boolean;
+  ticketTypeName: string;
 };
 
 type SellerTicketsTableProps = {
@@ -44,13 +41,6 @@ export function SellerTicketsTable({
   hasPreviousPage,
   onPageChange,
 }: SellerTicketsTableProps) {
-  const [pending, startTransition] = useTransition();
-
-  const handleVipToggle = (ticketId: string, nextValue: boolean) => {
-    startTransition(() => {
-      void toggleTicketVip({ ticketId, isVip: nextValue });
-    });
-  };
 
   const goToPage = (nextPage: number) => {
     if (onPageChange) {
@@ -68,7 +58,7 @@ export function SellerTicketsTable({
             <TableHead>Event</TableHead>
             <TableHead>Beløp</TableHead>
             <TableHead>Status</TableHead>
-            <TableHead>VIP</TableHead>
+            <TableHead>Type</TableHead>
             <TableHead>Dato</TableHead>
             <TableHead className="text-right">Handlinger</TableHead>
           </TableRow>
@@ -82,7 +72,7 @@ export function SellerTicketsTable({
             </TableRow>
           ) : (
             data.map((row) => (
-              <TableRow key={row.ticketId} className={row.isVip ? "bg-blue-50/50" : undefined}>
+              <TableRow key={row.ticketId}>
                 <TableCell className="font-medium">{row.customerName}</TableCell>
                 <TableCell>{row.customerEmail}</TableCell>
                 <TableCell>{row.eventName}</TableCell>
@@ -93,11 +83,7 @@ export function SellerTicketsTable({
                   </Badge>
                 </TableCell>
                 <TableCell>
-                  <Switch
-                    checked={row.isVip}
-                    onCheckedChange={(checked) => handleVipToggle(row.ticketId, checked)}
-                    disabled={pending}
-                  />
+                  <Badge variant="outline">{row.ticketTypeName}</Badge>
                 </TableCell>
                 <TableCell>{new Date(row.purchasedAt).toLocaleString("nb-NO")}</TableCell>
                 <TableCell className="text-right">
@@ -122,7 +108,7 @@ export function SellerTicketsTable({
             <Button
               variant="outline"
               size="sm"
-              disabled={!hasPreviousPage || pending || !onPageChange}
+              disabled={!hasPreviousPage || !onPageChange}
               onClick={() => goToPage(page - 1)}
             >
               Forrige
@@ -130,7 +116,7 @@ export function SellerTicketsTable({
             <Button
               variant="outline"
               size="sm"
-              disabled={!hasNextPage || pending || !onPageChange}
+              disabled={!hasNextPage || !onPageChange}
               onClick={() => goToPage(page + 1)}
             >
               Neste

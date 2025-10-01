@@ -135,6 +135,7 @@ export const getCustomers = query({
     const slice = filteredTickets.slice(start, start + PAGE_SIZE);
 
     const userCache = new Map<string, UserDoc | undefined>();
+    const ticketTypeCache = new Map<Id<"ticketTypes"> | undefined, any>();
 
     const data = await Promise.all(
       slice.map(async (ticket) => {
@@ -146,6 +147,14 @@ export const getCustomers = query({
           userCache.set(ticket.userId, user ?? undefined);
         }
 
+        let ticketType = null;
+        if (ticket.ticketTypeId && !ticketTypeCache.has(ticket.ticketTypeId)) {
+          ticketType = await ctx.db.get(ticket.ticketTypeId);
+          ticketTypeCache.set(ticket.ticketTypeId, ticketType);
+        } else if (ticket.ticketTypeId) {
+          ticketType = ticketTypeCache.get(ticket.ticketTypeId);
+        }
+
         const user = userCache.get(ticket.userId);
         const event = eventLookup.get(ticket.eventId) as EventDoc;
 
@@ -154,10 +163,10 @@ export const getCustomers = query({
           customerName: user?.name ?? "Ukjent",
           customerEmail: user?.email ?? "Ukjent",
           eventName: event.name,
-          amount: ticket.amount ?? 0,
+          amount: ticket.amount,
           status: ticket.status,
           purchasedAt: ticket.purchasedAt,
-          isVip: ticket.isVip ?? false,
+          ticketTypeName: ticketType?.name ?? "Standard",
         };
       })
     );
@@ -276,10 +285,4 @@ export const getEventPerformance = query({
   },
 });
 
-export const setVipStatus = mutation({
-  args: { ticketId: v.id("tickets"), isVip: v.boolean() },
-  handler: async (ctx, { ticketId, isVip }) => {
-    await ctx.db.patch(ticketId, { isVip });
-  },
-});
 

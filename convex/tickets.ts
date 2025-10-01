@@ -61,15 +61,6 @@ export const updateTicketStatus = mutation({
   },
 });
 
-export const updateVipStatus = mutation({
-  args: {
-    ticketId: v.id("tickets"),
-    isVip: v.boolean(),
-  },
-  handler: async (ctx, { ticketId, isVip }) => {
-    await ctx.db.patch(ticketId, { isVip });
-  },
-});
 
 export const getSellerTicketsPaginated = query({
   args: {
@@ -127,6 +118,8 @@ export const getSellerTicketsPaginated = query({
 
     // Get tickets with pagination
     const allTickets = [];
+    const ticketTypeCache = new Map();
+
     for (const eventId of eventIds) {
       const tickets = await ctx.db
         .query("tickets")
@@ -135,6 +128,18 @@ export const getSellerTicketsPaginated = query({
 
       for (const ticket of tickets) {
         const event = events.find((e) => e._id === ticket.eventId);
+
+        // Get ticket type if exists
+        let ticketType = null;
+        if (ticket.ticketTypeId) {
+          if (!ticketTypeCache.has(ticket.ticketTypeId)) {
+            ticketType = await ctx.db.get(ticket.ticketTypeId);
+            ticketTypeCache.set(ticket.ticketTypeId, ticketType);
+          } else {
+            ticketType = ticketTypeCache.get(ticket.ticketTypeId);
+          }
+        }
+
         if (event) {
           allTickets.push({
             ticketId: ticket._id,
@@ -142,10 +147,10 @@ export const getSellerTicketsPaginated = query({
             eventName: event.name,
             customerName: "Unknown", // We'll get this from user data
             customerEmail: "unknown@example.com",
-            amount: ticket.amount ?? 0,
+            amount: ticket.amount,
             status: ticket.status,
             purchasedAt: ticket.purchasedAt,
-            isVip: ticket.isVip ?? false,
+            ticketTypeName: ticketType?.name ?? "Standard",
             event,
           });
         }
@@ -174,10 +179,10 @@ export const getSellerTicketsPaginated = query({
             style: "currency",
             currency: "NOK",
             minimumFractionDigits: 0,
-          }).format((ticket.amount ?? 0) / 100),
+          }).format(ticket.amount / 100),
           status: ticket.status,
           purchasedAt: ticket.purchasedAt,
-          isVip: ticket.isVip,
+          ticketTypeName: ticket.ticketTypeName,
         };
       })
     );

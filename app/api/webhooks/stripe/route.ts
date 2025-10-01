@@ -59,6 +59,7 @@ export async function POST(req: Request) {
       eventId: session.metadata.eventId as Id<"events">,
       userId: session.metadata.userId,
       waitingListId: session.metadata.waitingListId as Id<"waitingList">,
+      ticketTypeId: session.metadata.ticketTypeId as Id<"ticketTypes">,
     };
 
     console.log("Session metadata:", metadata);
@@ -76,6 +77,8 @@ export async function POST(req: Request) {
         paymentInfo: {
           paymentIntentId: session.payment_intent as string,
           amount: session.amount_total ?? 0,
+          ticketTypeId: metadata.ticketTypeId,
+          currency: session.currency?.toUpperCase(),
         },
       });
       console.log("Purchase ticket mutation completed:", result);

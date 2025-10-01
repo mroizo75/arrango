@@ -32,6 +32,7 @@ import { Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useStorageUrl } from "@/lib/hooks";
 import { CURRENCIES, detectCurrencyFromLocation, safeCurrencyCode, CurrencyCode } from "@/lib/currency";
+import { TicketTypeManager } from "./TicketTypeManager";
 
 const formSchema = z.object({
   name: z.string().min(1, "Event name is required"),
@@ -419,6 +420,16 @@ export default function EventForm({ mode, initialData }: EventFormProps) {
           )}
         </Button>
       </form>
+
+      {/* Ticket Types Manager - Only show for existing events */}
+      {mode === "edit" && initialData && (
+        <div className="mt-12 pt-8 border-t">
+          <TicketTypeManager
+            eventId={initialData._id}
+            eventCurrency={form.watch("currency") || "NOK"}
+          />
+        </div>
+      )}
     </Form>
   );
 }

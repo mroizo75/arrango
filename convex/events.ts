@@ -198,6 +198,8 @@ export const purchaseTicket = mutation({
     paymentInfo: v.object({
       paymentIntentId: v.string(),
       amount: v.number(),
+      ticketTypeId: v.optional(v.id("ticketTypes")),
+      currency: v.optional(v.string()),
     }),
   },
   handler: async (ctx, { eventId, userId, waitingListId, paymentInfo }) => {
@@ -247,17 +249,32 @@ export const purchaseTicket = mutation({
       throw new Error("Event is no longer active");
     }
 
+    // Handle ticket type inventory if specified
+    if (paymentInfo.ticketTypeId) {
+      await ctx.runMutation(api.ticketTypes.updateTicketTypeSoldQuantity, {
+        ticketTypeId: paymentInfo.ticketTypeId,
+        quantityChange: 1,
+      });
+    }
+
     try {
       console.log("Creating ticket with payment info", paymentInfo);
       // Create ticket with payment info
-      await ctx.db.insert("tickets", {
+      const ticketData: any = {
         eventId,
         userId,
         purchasedAt: Date.now(),
         status: TICKET_STATUS.VALID,
         paymentIntentId: paymentInfo.paymentIntentId,
         amount: paymentInfo.amount,
-      });
+        currency: paymentInfo.currency || "NOK",
+      };
+
+      if (paymentInfo.ticketTypeId) {
+        ticketData.ticketTypeId = paymentInfo.ticketTypeId;
+      }
+
+      await ctx.db.insert("tickets", ticketData);
 
       console.log("Updating waiting list status to purchased");
       await ctx.db.patch(waitingListId, {

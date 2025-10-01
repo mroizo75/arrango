@@ -8,6 +8,7 @@ import { useUser } from "@clerk/nextjs";
 import { api } from "@/convex/_generated/api";
 import { useQuery } from "convex/react";
 import ReleaseTicket from "./ReleaseTicket";
+import { TicketTypeSelector } from "./TicketTypeSelector";
 import { Ticket } from "lucide-react";
 
 export default function PurchaseTicket({ eventId }: { eventId: Id<"events"> }) {
@@ -20,6 +21,12 @@ export default function PurchaseTicket({ eventId }: { eventId: Id<"events"> }) {
 
   const [timeRemaining, setTimeRemaining] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [selectedTicketType, setSelectedTicketType] = useState<{
+    _id: Id<"ticketTypes">;
+    name: string;
+    price: number;
+    currency: string;
+  } | null>(null);
 
   const offerExpiresAt = queuePosition?.offerExpiresAt ?? 0;
   const isExpired = Date.now() > offerExpiresAt;
@@ -52,12 +59,13 @@ export default function PurchaseTicket({ eventId }: { eventId: Id<"events"> }) {
   }, [offerExpiresAt, isExpired]);
 
   const handlePurchase = async () => {
-    if (!user) return;
+    if (!user || !selectedTicketType) return;
 
     try {
       setIsLoading(true);
       const { sessionUrl } = await createStripeCheckoutSession({
         eventId,
+        ticketTypeId: selectedTicketType._id,
       });
 
       if (sessionUrl) {
@@ -100,9 +108,18 @@ export default function PurchaseTicket({ eventId }: { eventId: Id<"events"> }) {
           </div>
         </div>
 
+        {/* Ticket Type Selection */}
+        <div className="bg-gray-50 rounded-lg p-4">
+          <TicketTypeSelector
+            eventId={eventId}
+            selectedTypeId={selectedTicketType?._id}
+            onTypeSelect={setSelectedTicketType}
+          />
+        </div>
+
         <button
           onClick={handlePurchase}
-          disabled={isExpired || isLoading}
+          disabled={isExpired || isLoading || !selectedTicketType}
           className="w-full bg-gradient-to-r from-amber-500 to-amber-600 text-white px-8 py-4 rounded-lg font-bold shadow-md hover:from-amber-600 hover:to-amber-700 transform hover:scale-[1.02] transition-all duration-200 disabled:from-gray-400 disabled:to-gray-500 disabled:cursor-not-allowed disabled:hover:scale-100 text-lg"
         >
           {isLoading
