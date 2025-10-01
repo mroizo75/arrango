@@ -114,21 +114,53 @@ export default function EventCard({ eventId }: { eventId: Id<"events"> }) {
       );
     }
 
+    // Always show purchase options if tickets are available, regardless of existing tickets
+    // But show a notification if user already has tickets
+
+    // Show existing ticket notification if user has tickets
     if (userTicket) {
       return (
-        <div className="mt-4 flex items-center justify-between p-3 bg-green-50 rounded-lg border border-green-100">
-          <div className="flex items-center">
-            <Check className="w-5 h-5 text-green-600 mr-2" />
-            <span className="text-green-700 font-medium">
-              You have a ticket!
-            </span>
+        <div className="mt-4 space-y-3">
+          {/* Existing ticket notification */}
+          <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg border border-green-100">
+            <div className="flex items-center">
+              <Check className="w-5 h-5 text-green-600 mr-2" />
+              <span className="text-green-700 font-medium">
+                You have a ticket!
+              </span>
+            </div>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                router.push(`/tickets/${userTicket._id}`);
+              }}
+              className="text-sm bg-green-600 hover:bg-green-700 text-white px-3 py-1.5 rounded-full font-medium shadow-sm transition-colors duration-200 flex items-center gap-1"
+            >
+              View your ticket
+            </button>
           </div>
-          <button
-            onClick={() => router.push(`/tickets/${userTicket._id}`)}
-            className="text-sm bg-green-600 hover:bg-green-700 text-white px-3 py-1.5 rounded-full font-medium shadow-sm transition-colors duration-200 flex items-center gap-1"
-          >
-            View your ticket
-          </button>
+
+          {/* Always show queue/purchase options for buying more tickets */}
+          {queuePosition ? (
+            <div>
+              {queuePosition.status === "offered" && (
+                <PurchaseTicket eventId={eventId} />
+              )}
+              {renderQueuePosition()}
+              {queuePosition.status === "expired" && (
+                <div className="p-3 bg-red-50 rounded-lg border border-red-100">
+                  <span className="text-red-700 font-medium flex items-center">
+                    <XCircle className="w-5 h-5 mr-2" />
+                    Offer expired
+                  </span>
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="text-center">
+              <PurchaseTicket eventId={eventId} />
+            </div>
+          )}
         </div>
       );
     }

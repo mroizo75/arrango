@@ -80,17 +80,22 @@ export default function EventPage() {
                   <div className="bg-gray-50 p-4 rounded-lg border border-gray-100">
                     <div className="flex items-center text-gray-600 mb-1">
                       <CalendarDays className="w-5 h-5 mr-2 text-blue-600" />
-                      <span className="text-sm font-medium">Date</span>
+                      <span className="text-sm font-medium">Dato</span>
                     </div>
                     <p className="text-gray-900">
-                      {new Date(event.eventDate).toLocaleDateString()}
+                      {new Date(event.eventDate).toLocaleDateString("nb-NO", {
+                        weekday: "long",
+                        year: "numeric",
+                        month: "long",
+                        day: "numeric",
+                      })}
                     </p>
                   </div>
 
                   <div className="bg-gray-50 p-4 rounded-lg border border-gray-100">
                     <div className="flex items-center text-gray-600 mb-1">
                       <MapPin className="w-5 h-5 mr-2 text-blue-600" />
-                      <span className="text-sm font-medium">Location</span>
+                      <span className="text-sm font-medium">Sted</span>
                     </div>
                     <p className="text-gray-900">{event.location}</p>
                   </div>
@@ -98,7 +103,7 @@ export default function EventPage() {
                   <div className="bg-gray-50 p-4 rounded-lg border border-gray-100">
                     <div className="flex items-center text-gray-600 mb-1">
                       <Ticket className="w-5 h-5 mr-2 text-blue-600" />
-                      <span className="text-sm font-medium">Price</span>
+                      <span className="text-sm font-medium">Pris per billett</span>
                     </div>
                     <p className="text-gray-900">{formatPrice(event.price, safeCurrencyCode(event.currency))}</p>
                   </div>
@@ -106,24 +111,70 @@ export default function EventPage() {
                   <div className="bg-gray-50 p-4 rounded-lg border border-gray-100">
                     <div className="flex items-center text-gray-600 mb-1">
                       <Users className="w-5 h-5 mr-2 text-blue-600" />
-                      <span className="text-sm font-medium">Availability</span>
+                      <span className="text-sm font-medium">Tilgjengelighet</span>
                     </div>
                     <p className="text-gray-900">
                       {availability.totalTickets - availability.purchasedCount}{" "}
-                      / {availability.totalTickets} left
+                      / {availability.totalTickets} ledige
                     </p>
                   </div>
                 </div>
 
-                {/* Additional Event Information */}
+                {/* Event Information */}
                 <div className="bg-blue-50 border border-blue-100 rounded-lg p-6">
                   <h3 className="text-lg font-semibold text-blue-900 mb-2">
-                    Event Information
+                    Arrangement informasjon
                   </h3>
                   <ul className="space-y-2 text-blue-700">
-                    <li>• Please arrive 30 minutes before the event starts</li>
-                    <li>• Tickets are non-refundable</li>
-                    <li>• Age restriction: 18+</li>
+                    {event.checkInTime && (
+                      <li>• Ankomst {event.checkInTime}</li>
+                    )}
+                    {event.refundPolicy && (
+                      <li>• {event.refundPolicy === "non-refundable"
+                        ? "Billetter er ikke refunderbare"
+                        : event.refundPolicy === "refundable-24h"
+                        ? "Refunderbar opp til 24 timer før arrangement"
+                        : event.refundPolicy === "refundable-48h"
+                        ? "Refunderbar opp til 48 timer før arrangement"
+                        : event.refundPolicy === "refundable-week"
+                        ? "Refunderbar opp til 1 uke før arrangement"
+                        : event.refundPolicy === "full-refund"
+                        ? "Full refusjon tilgjengelig når som helst"
+                        : event.refundPolicy}</li>
+                    )}
+                    {event.ageRestriction && (
+                      <li>• Aldersgrense: {
+                        event.ageRestriction === "all-ages" ? "Åpen for alle aldre" :
+                        event.ageRestriction === "13+" ? "13+" :
+                        event.ageRestriction === "16+" ? "16+" :
+                        event.ageRestriction === "18+" ? "18+" :
+                        event.ageRestriction === "21+" ? "21+" :
+                        event.ageRestriction
+                      }</li>
+                    )}
+                    {event.dressCode && event.dressCode !== "none" && (
+                      <li>• Kleskode: {
+                        event.dressCode === "casual" ? "Uformell" :
+                        event.dressCode === "smart-casual" ? "Smart uformell" :
+                        event.dressCode === "business" ? "Forretningsmessig" :
+                        event.dressCode === "formal" ? "Formell" :
+                        event.dressCode === "themed" ? "Tema" :
+                        event.dressCode
+                      }</li>
+                    )}
+                    {event.parkingInfo && (
+                      <li>• Parkering: {event.parkingInfo}</li>
+                    )}
+                    {event.venueDetails && (
+                      <li>• Lokale detaljer: {event.venueDetails}</li>
+                    )}
+                    {(!event.checkInTime && !event.refundPolicy && !event.ageRestriction && !event.dressCode && !event.parkingInfo && !event.venueDetails) && (
+                      <>
+                        <li>• Ankomst 30 minutter før arrangementet starter</li>
+                        <li>• Billetter er ikke refunderbare</li>
+                        <li>• Aldersgrense: 18+</li>
+                      </>
+                    )}
                   </ul>
                 </div>
               </div>

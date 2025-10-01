@@ -49,6 +49,14 @@ export const create = mutation({
     price: v.number(),
     totalTickets: v.number(),
     userId: v.string(),
+    // Event details
+    checkInTime: v.optional(v.string()),
+    refundPolicy: v.optional(v.string()),
+    ageRestriction: v.optional(v.string()),
+    dressCode: v.optional(v.string()),
+    parkingInfo: v.optional(v.string()),
+    additionalInfo: v.optional(v.array(v.string())),
+    venueDetails: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     const eventId = await ctx.db.insert("events", {
@@ -60,6 +68,13 @@ export const create = mutation({
       price: args.price,
       totalTickets: args.totalTickets,
       userId: args.userId,
+      checkInTime: args.checkInTime,
+      refundPolicy: args.refundPolicy,
+      ageRestriction: args.ageRestriction,
+      dressCode: args.dressCode,
+      parkingInfo: args.parkingInfo,
+      additionalInfo: args.additionalInfo,
+      venueDetails: args.venueDetails,
     });
     return eventId;
   },
@@ -480,6 +495,14 @@ export const updateEvent = mutation({
     currency: v.optional(v.string()),
     price: v.number(),
     totalTickets: v.number(),
+    // Event details
+    checkInTime: v.optional(v.string()),
+    refundPolicy: v.optional(v.string()),
+    ageRestriction: v.optional(v.string()),
+    dressCode: v.optional(v.string()),
+    parkingInfo: v.optional(v.string()),
+    additionalInfo: v.optional(v.array(v.string())),
+    venueDetails: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     const { eventId, ...updates } = args;

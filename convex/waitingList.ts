@@ -230,7 +230,42 @@ export const releaseTicket = mutation({
       status: WAITING_LIST_STATUS.EXPIRED,
     });
 
-    // Process q  ueue to offer ticket to next person
+    // Process queue to offer ticket to next person
     await ctx.runMutation(api.waitingList.processQueue, { eventId });
+  },
+});
+
+// Create a temporary offer for buying additional tickets
+export const createTemporaryOffer = mutation({
+  args: {
+    eventId: v.id("events"),
+    userId: v.string(),
+  },
+  handler: async (ctx, { eventId, userId }) => {
+    const now = Date.now();
+
+    const waitingListId = await ctx.db.insert("waitingList", {
+      eventId,
+      userId,
+      status: WAITING_LIST_STATUS.OFFERED,
+      offerExpiresAt: now + DURATIONS.TICKET_OFFER,
+    });
+
+    // Schedule expiration
+    await ctx.scheduler.runAfter(
+      DURATIONS.TICKET_OFFER,
+      internal.waitingList.expireOffer,
+      { waitingListId, eventId }
+    );
+
+    return waitingListId;
+  },
+});
+
+// Get waiting list entry by ID
+export const getById = query({
+  args: { waitingListId: v.id("waitingList") },
+  handler: async (ctx, args) => {
+    return await ctx.db.get(args.waitingListId);
   },
 });

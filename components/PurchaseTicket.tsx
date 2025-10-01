@@ -92,7 +92,9 @@ export default function PurchaseTicket({ eventId }: { eventId: Id<"events"> }) {
     }
   };
 
-  if (!user || !queuePosition || queuePosition.status !== "offered") {
+  // PurchaseTicket now works for both new purchases and additional tickets
+
+  if (!user) {
     return null;
   }
 
@@ -141,9 +143,11 @@ export default function PurchaseTicket({ eventId }: { eventId: Id<"events"> }) {
             : "Purchase Your Ticket Now →"}
         </button>
 
-        <div className="mt-4">
-          <ReleaseTicket eventId={eventId} waitingListId={queuePosition._id} />
-        </div>
+        {queuePosition && (
+          <div className="mt-4">
+            <ReleaseTicket eventId={eventId} waitingListId={queuePosition._id} />
+          </div>
+        )}
       </div>
     </div>
   );

@@ -13,6 +13,14 @@ export default defineSchema({
     userId: v.string(),
     imageStorageId: v.optional(v.id("_storage")),
     is_cancelled: v.optional(v.boolean()),
+    // Event details that organizers can customize
+    checkInTime: v.optional(v.string()), // "30 minutes before"
+    refundPolicy: v.optional(v.string()), // "Non-refundable", "Refundable up to 24h before", etc.
+    ageRestriction: v.optional(v.string()), // "18+", "All ages", "16+", etc.
+    dressCode: v.optional(v.string()), // "Smart casual", "Formal", etc.
+    parkingInfo: v.optional(v.string()), // "Free parking available", "Paid parking nearby", etc.
+    additionalInfo: v.optional(v.array(v.string())), // Array of additional information points
+    venueDetails: v.optional(v.string()), // Additional venue information
   }),
   tickets: defineTable({
     eventId: v.id("events"),

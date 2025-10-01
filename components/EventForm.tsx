@@ -47,6 +47,14 @@ const formSchema = z.object({
   currency: z.string().optional(),
   price: z.number().min(0, "Price must be 0 or greater"),
   totalTickets: z.number().min(1, "Must have at least 1 ticket"),
+  // Event details
+  checkInTime: z.string().optional(),
+  refundPolicy: z.string().optional(),
+  ageRestriction: z.string().optional(),
+  dressCode: z.string().optional(),
+  parkingInfo: z.string().optional(),
+  additionalInfo: z.array(z.string()).optional(),
+  venueDetails: z.string().optional(),
 });
 
 type FormData = z.infer<typeof formSchema>;
@@ -61,6 +69,14 @@ interface InitialEventData {
   price: number;
   totalTickets: number;
   imageStorageId?: Id<"_storage">;
+  // Event details
+  checkInTime?: string;
+  refundPolicy?: string;
+  ageRestriction?: string;
+  dressCode?: string;
+  parkingInfo?: string;
+  additionalInfo?: string[];
+  venueDetails?: string;
 }
 
 interface EventFormProps {
@@ -95,8 +111,15 @@ export default function EventForm({ mode, initialData }: EventFormProps) {
       location: initialData?.location ?? "",
       eventDate: initialData ? new Date(initialData.eventDate) : new Date(),
       currency: initialData?.currency ? safeCurrencyCode(initialData.currency) : detectCurrencyFromLocation(initialData?.location ?? ""),
-      price: initialData?.price ?? 0,
+      price: initialData ? (initialData.price / 100) : 0, // Convert from øre to currency units
       totalTickets: initialData?.totalTickets ?? 1,
+      checkInTime: initialData?.checkInTime ?? "",
+      refundPolicy: initialData?.refundPolicy ?? "",
+      ageRestriction: initialData?.ageRestriction ?? "",
+      dressCode: initialData?.dressCode ?? "",
+      parkingInfo: initialData?.parkingInfo ?? "",
+      additionalInfo: initialData?.additionalInfo ?? [],
+      venueDetails: initialData?.venueDetails ?? "",
     },
   });
 
@@ -127,6 +150,7 @@ export default function EventForm({ mode, initialData }: EventFormProps) {
         if (mode === "create") {
           const eventId = await createEvent({
             ...values,
+            price: Math.round(values.price * 100), // Convert kr to øre
             userId: user.id,
             eventDate: values.eventDate.getTime(),
           });
@@ -149,6 +173,7 @@ export default function EventForm({ mode, initialData }: EventFormProps) {
           await updateEvent({
             eventId: initialData._id,
             ...values,
+            price: Math.round(values.price * 100), // Convert kr to øre
             eventDate: values.eventDate.getTime(),
           });
 
@@ -219,8 +244,8 @@ export default function EventForm({ mode, initialData }: EventFormProps) {
             control={form.control}
             name="name"
             render={({ field }) => (
-              <FormItem>
-                <FormLabel>Event Name</FormLabel>
+                <FormItem>
+                  <FormLabel>Arrangement navn</FormLabel>
                 <FormControl>
                   <Input {...field} />
                 </FormControl>
@@ -233,8 +258,8 @@ export default function EventForm({ mode, initialData }: EventFormProps) {
             control={form.control}
             name="description"
             render={({ field }) => (
-              <FormItem>
-                <FormLabel>Description</FormLabel>
+                <FormItem>
+                  <FormLabel>Beskrivelse</FormLabel>
                 <FormControl>
                   <Textarea {...field} />
                 </FormControl>
@@ -247,8 +272,8 @@ export default function EventForm({ mode, initialData }: EventFormProps) {
             control={form.control}
             name="location"
             render={({ field }) => (
-              <FormItem>
-                <FormLabel>Location</FormLabel>
+                <FormItem>
+                  <FormLabel>Sted</FormLabel>
                 <FormControl>
                   <Input {...field} />
                 </FormControl>
@@ -261,8 +286,8 @@ export default function EventForm({ mode, initialData }: EventFormProps) {
             control={form.control}
             name="eventDate"
             render={({ field }) => (
-              <FormItem>
-                <FormLabel>Event Date</FormLabel>
+                <FormItem>
+                  <FormLabel>Arrangement dato</FormLabel>
                 <FormControl>
                   <Input
                     type="date"
@@ -401,6 +426,142 @@ export default function EventForm({ mode, initialData }: EventFormProps) {
               )}
             </div>
           </div>
+        </div>
+
+        {/* Event Details Section */}
+        <div className="space-y-6 pt-8 border-t">
+          <h3 className="text-lg font-medium">Event Details</h3>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <FormField
+              control={form.control}
+              name="checkInTime"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Innsjekkingstid</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="30 minutter før arrangement"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="ageRestriction"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Aldersgrense</FormLabel>
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Velg aldersgrense" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="all-ages">Åpen for alle aldre</SelectItem>
+                      <SelectItem value="13+">13+</SelectItem>
+                      <SelectItem value="16+">16+</SelectItem>
+                      <SelectItem value="18+">18+</SelectItem>
+                      <SelectItem value="21+">21+</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="refundPolicy"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Refusjonspolicy</FormLabel>
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Velg refusjonspolicy" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="non-refundable">Ikke refunderbar</SelectItem>
+                      <SelectItem value="refundable-24h">Refunderbar opp til 24t før</SelectItem>
+                      <SelectItem value="refundable-48h">Refunderbar opp til 48t før</SelectItem>
+                      <SelectItem value="refundable-week">Refunderbar opp til 1 uke før</SelectItem>
+                      <SelectItem value="full-refund">Full refusjon når som helst</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="dressCode"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Kleskode (valgfritt)</FormLabel>
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Velg kleskode" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="casual">Uformell</SelectItem>
+                      <SelectItem value="smart-casual">Smart uformell</SelectItem>
+                      <SelectItem value="business">Forretningsmessig</SelectItem>
+                      <SelectItem value="formal">Formell</SelectItem>
+                      <SelectItem value="themed">Tema</SelectItem>
+                      <SelectItem value="none">Ingen spesifikk kleskode</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+
+          <FormField
+            control={form.control}
+            name="parkingInfo"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Parkering informasjon (valgfritt)</FormLabel>
+                <FormControl>
+                  <Textarea
+                    placeholder="Gratis parkering tilgjengelig, Betalt parkering i nærheten, etc."
+                    {...field}
+                    rows={2}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="venueDetails"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Lokale detaljer (valgfritt)</FormLabel>
+                <FormControl>
+                  <Textarea
+                    placeholder="Tilleggsinformasjon om lokalet, tilgjengelighet, etc."
+                    {...field}
+                    rows={3}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
         </div>
 
         <Button

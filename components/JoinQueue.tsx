@@ -70,7 +70,7 @@ export default function JoinQueue({
   const isPastEvent = event.eventDate < Date.now();
 
   return (
-    <div>
+    <div data-queue-section>
       {(!queuePosition ||
         queuePosition.status === WAITING_LIST_STATUS.EXPIRED ||
         (queuePosition.status === WAITING_LIST_STATUS.OFFERED &&

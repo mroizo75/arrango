@@ -41,14 +41,29 @@ export async function createStripeCheckoutSession({
   const event = await convex.query(api.events.getById, { eventId });
   if (!event) throw new Error("Event not found");
 
-  // Get waiting list entry
+  // Get waiting list entry (optional for buying additional tickets)
   const queuePosition = await convex.query(api.waitingList.getQueuePosition, {
     eventId,
     userId,
   });
 
+  // If no valid offer exists, create a temporary one for additional purchases
+  let validQueuePosition = queuePosition;
   if (!queuePosition || queuePosition.status !== "offered") {
-    throw new Error("No valid ticket offer found");
+    // Create a temporary offer for additional ticket purchases
+    await convex.mutation(api.waitingList.createTemporaryOffer, {
+      eventId,
+      userId,
+    });
+    // Re-fetch the queue position to get the enriched data
+    validQueuePosition = await convex.query(api.waitingList.getQueuePosition, {
+      eventId,
+      userId,
+    });
+  }
+
+  if (!validQueuePosition || validQueuePosition.status !== "offered") {
+    throw new Error("Could not create ticket offer");
   }
 
   const stripeConnectId = await convex.query(
@@ -62,7 +77,7 @@ export async function createStripeCheckoutSession({
     throw new Error("Stripe Connect ID not found for owner of the event!");
   }
 
-  if (!queuePosition.offerExpiresAt) {
+  if (!validQueuePosition.offerExpiresAt) {
     throw new Error("Ticket offer has no expiration date");
   }
 
@@ -154,7 +169,7 @@ export async function createStripeCheckoutSession({
   const metadata = {
     eventId,
     userId,
-    waitingListId: queuePosition._id,
+    waitingListId: validQueuePosition._id,
     ticketTypeId: ticketTypeId || null,
     cart: cart ? JSON.stringify(cart) : null,
   };
