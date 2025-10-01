@@ -4,7 +4,11 @@ import Link from "next/link";
 import logo from "@/public/logo-light.png";
 import SearchBar from "./SearchBar";
 
-function Header() {
+interface HeaderProps {
+  isSeller?: boolean;
+}
+
+function Header({ isSeller = false }: HeaderProps) {
   return (
     <div className="border-b">
       <div className="flex flex-col lg:flex-row items-center gap-4 p-4">
@@ -41,11 +45,13 @@ function Header() {
         <div className="hidden lg:block ml-auto">
           <SignedIn>
             <div className="flex items-center gap-3">
-              <Link href="/seller">
-                <button className="bg-blue-600 text-white px-3 py-1.5 text-sm rounded-lg hover:bg-blue-700 transition">
-                  Dashboard
-                </button>
-              </Link>
+              {isSeller && (
+                <Link href="/seller">
+                  <button className="bg-blue-600 text-white px-3 py-1.5 text-sm rounded-lg hover:bg-blue-700 transition">
+                    Dashboard
+                  </button>
+                </Link>
+              )}
 
               <Link href="/tickets">
                 <button className="bg-gray-100 text-gray-800 px-3 py-1.5 text-sm rounded-lg hover:bg-gray-200 transition border border-gray-300">
@@ -68,13 +74,15 @@ function Header() {
         {/* Mobile Action Buttons */}
         <div className="lg:hidden w-full flex justify-center gap-3">
           <SignedIn>
-            <Link href="/seller" className="flex-1">
-              <button className="w-full bg-blue-600 text-white px-3 py-1.5 text-sm rounded-lg hover:bg-blue-700 transition">
-                Dashboard
-              </button>
-            </Link>
+            {isSeller && (
+              <Link href="/seller" className="flex-1">
+                <button className="w-full bg-blue-600 text-white px-3 py-1.5 text-sm rounded-lg hover:bg-blue-700 transition">
+                  Dashboard
+                </button>
+              </Link>
+            )}
 
-            <Link href="/tickets" className="flex-1">
+            <Link href={`/tickets${isSeller ? '' : ''}`} className={isSeller ? "flex-1" : "w-full"}>
               <button className="w-full bg-gray-100 text-gray-800 px-3 py-1.5 text-sm rounded-lg hover:bg-gray-200 transition border border-gray-300">
                 My Tickets
               </button>
