@@ -198,3 +198,23 @@ export const getSellerTicketsPaginated = query({
     };
   },
 });
+
+export const getTicketById = query({
+  args: { ticketId: v.id("tickets") },
+  handler: async (ctx, { ticketId }) => {
+    const ticket = await ctx.db.get(ticketId);
+    if (!ticket) return null;
+
+    // Get ticket type name
+    let ticketTypeName = null;
+    if (ticket.ticketTypeId) {
+      const ticketType = await ctx.db.get(ticket.ticketTypeId);
+      ticketTypeName = ticketType?.name || null;
+    }
+
+    return {
+      ...ticket,
+      ticketTypeName,
+    };
+  },
+});

@@ -40,6 +40,23 @@ export default function PurchaseTicket({ eventId }: { eventId: Id<"events"> }) {
       benefits?: string[];
     };
     quantity: number;
+    tickets: Array<{
+      ticketType: {
+        _id: Id<"ticketTypes">;
+        name: string;
+        description?: string;
+        price: number;
+        currency: string;
+        maxQuantity: number;
+        soldQuantity: number;
+        availableQuantity: number;
+        isSoldOut: boolean;
+        benefits?: string[];
+      };
+      recipientName: string;
+      recipientEmail: string;
+      id: string;
+    }>;
   }>>([]);
 
   const offerExpiresAt = queuePosition?.offerExpiresAt ?? 0;
@@ -78,13 +95,19 @@ export default function PurchaseTicket({ eventId }: { eventId: Id<"events"> }) {
     try {
       setIsLoading(true);
 
-      // Send cart data for bulk purchase
+      // Send individual tickets with recipient info for bulk purchase
+      const allTickets = cart.flatMap(item =>
+        item.tickets.map(ticket => ({
+          ticketTypeId: ticket.ticketType._id,
+          recipientName: ticket.recipientName,
+          recipientEmail: ticket.recipientEmail,
+          id: ticket.id,
+        }))
+      );
+
       const { sessionUrl } = await createStripeCheckoutSession({
         eventId,
-        cart: cart.map(item => ({
-          ticketTypeId: item.ticketType._id,
-          quantity: item.quantity,
-        })),
+        tickets: allTickets,
       });
 
       if (sessionUrl) {

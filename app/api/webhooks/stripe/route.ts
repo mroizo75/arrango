@@ -61,6 +61,7 @@ export async function POST(req: Request) {
       waitingListId: session.metadata.waitingListId as Id<"waitingList">,
       ticketTypeId: session.metadata.ticketTypeId as Id<"ticketTypes">,
       cart: session.metadata.cart ? JSON.parse(session.metadata.cart) : undefined,
+      tickets: session.metadata.tickets ? JSON.parse(session.metadata.tickets) : undefined,
     };
 
     console.log("Session metadata:", metadata);
@@ -81,6 +82,7 @@ export async function POST(req: Request) {
           ticketTypeId: metadata.ticketTypeId,
           currency: session.currency?.toUpperCase(),
           cart: metadata.cart,
+          tickets: metadata.tickets,
         },
       });
       console.log("Purchase ticket mutation completed:", result);

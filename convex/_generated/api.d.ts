@@ -10,6 +10,7 @@
 
 import type * as constants from "../constants.js";
 import type * as crons from "../crons.js";
+import type * as email from "../email.js";
 import type * as events from "../events.js";
 import type * as organizerProfile from "../organizerProfile.js";
 import type * as scanners from "../scanners.js";
@@ -38,6 +39,7 @@ import type {
 declare const fullApi: ApiFromModules<{
   constants: typeof constants;
   crons: typeof crons;
+  email: typeof email;
   events: typeof events;
   organizerProfile: typeof organizerProfile;
   scanners: typeof scanners;

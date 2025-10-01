@@ -38,6 +38,8 @@ export default defineSchema({
     currency: v.optional(v.string()), // Currency at time of purchase (optional for backward compatibility)
     scannedAt: v.optional(v.number()),
     scannedBy: v.optional(v.string()),
+    recipientName: v.optional(v.string()), // Name of the person the ticket is for
+    recipientEmail: v.optional(v.string()), // Email of the person the ticket is for
   })
     .index("by_event", ["eventId"])
     .index("by_ticket_type", ["ticketTypeId"])

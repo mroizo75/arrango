@@ -9,6 +9,8 @@ import {
   MapPin,
   Ticket as TicketIcon,
   User,
+  Share2,
+  Download,
 } from "lucide-react";
 import QRCode from "react-qr-code";
 import Spinner from "./Spinner";
@@ -16,8 +18,11 @@ import { useStorageUrl } from "@/lib/hooks";
 import { formatPrice, safeCurrencyCode } from "@/lib/currency";
 import Link from "next/link";
 import Image from "next/image";
+import { useToast } from "@/hooks/use-toast";
+import { Button } from "@/components/ui/button";
 
 export default function Ticket({ ticketId }: { ticketId: Id<"tickets"> }) {
+  const { toast } = useToast();
   const ticket = useQuery(api.tickets.getTicketWithDetails, { ticketId });
   const user = useQuery(api.users.getUserById, {
     userId: ticket?.userId ?? "",
@@ -32,6 +37,48 @@ export default function Ticket({ ticketId }: { ticketId: Id<"tickets"> }) {
   if (!ticket || !ticket.event || !user) {
     return <Spinner />;
   }
+
+  const handleSaveTicket = () => {
+    // For now, just show a toast. In the future, this could download a PDF or image
+    toast({
+      title: "Billett lagret",
+      description: "Din billett er nå lagret i nettleseren din.",
+    });
+  };
+
+  const handleShareTicket = async () => {
+    const ticketUrl = `${window.location.origin}/tickets/${ticketId}`;
+
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: `Billett til ${ticket.event!.name}`,
+          text: `Se min billett til ${ticket.event!.name}`,
+          url: ticketUrl,
+        });
+      } catch {
+        // User cancelled share or share failed
+        copyToClipboard(ticketUrl);
+      }
+    } else {
+      copyToClipboard(ticketUrl);
+    }
+  };
+
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text).then(() => {
+      toast({
+        title: "Lenke kopiert",
+        description: "Billett-lenke er kopiert til utklippstavlen.",
+      });
+    }).catch(() => {
+      toast({
+        title: "Kunne ikke kopiere",
+        description: "Prøv å kopiere lenken manuelt.",
+        variant: "destructive",
+      });
+    });
+  };
 
   return (
     <div
@@ -135,6 +182,28 @@ export default function Ticket({ ticketId }: { ticketId: Id<"tickets"> }) {
               Ticket ID: {ticket._id}
             </p>
           </div>
+        </div>
+
+        {/* Action Buttons */}
+        <div className="mt-6 flex gap-3 justify-center">
+          <Button
+            onClick={handleSaveTicket}
+            variant="outline"
+            size="sm"
+            className="flex items-center gap-2"
+          >
+            <Download className="w-4 h-4" />
+            Lagre billett
+          </Button>
+          <Button
+            onClick={handleShareTicket}
+            variant="outline"
+            size="sm"
+            className="flex items-center gap-2"
+          >
+            <Share2 className="w-4 h-4" />
+            Del billett
+          </Button>
         </div>
 
         {/* Additional Information */}

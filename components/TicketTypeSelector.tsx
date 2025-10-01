@@ -5,6 +5,8 @@ import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { formatPrice, safeCurrencyCode } from "@/lib/currency";
 import { CheckCircle, Users, AlertCircle, Minus, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -22,9 +24,17 @@ interface TicketType {
   benefits?: string[];
 }
 
+interface CartTicket {
+  ticketType: TicketType;
+  recipientName: string;
+  recipientEmail: string;
+  id: string; // Unique ID for this specific ticket
+}
+
 interface CartItem {
   ticketType: TicketType;
   quantity: number;
+  tickets: CartTicket[]; // Individual tickets with recipient info
 }
 
 interface TicketTypeSelectorProps {
@@ -50,8 +60,18 @@ export function TicketTypeSelector({
       // Øk quantity hvis allerede i cart
       updateQuantity(ticketType._id, existingItem.quantity + 1);
     } else {
-      // Legg til ny item i cart
-      onCartUpdate([...cart, { ticketType, quantity: 1 }]);
+      // Legg til ny item i cart med én ticket
+      const newTicket: CartTicket = {
+        ticketType,
+        recipientName: "",
+        recipientEmail: "",
+        id: `${ticketType._id}-${Date.now()}`,
+      };
+      onCartUpdate([...cart, {
+        ticketType,
+        quantity: 1,
+        tickets: [newTicket]
+      }]);
     }
   };
 
@@ -73,11 +93,47 @@ export function TicketTypeSelector({
     const clampedQuantity = Math.min(newQuantity, maxAllowed);
 
     onCartUpdate(
-      cart.map(item =>
-        item.ticketType._id === ticketTypeId
-          ? { ...item, quantity: clampedQuantity }
-          : item
-      )
+      cart.map(item => {
+        if (item.ticketType._id === ticketTypeId) {
+          const currentTickets = item.tickets.length;
+          let newTickets = [...item.tickets];
+
+          if (clampedQuantity > currentTickets) {
+            // Legg til flere tickets
+            for (let i = currentTickets; i < clampedQuantity; i++) {
+              newTickets.push({
+                ticketType,
+                recipientName: "",
+                recipientEmail: "",
+                id: `${ticketType._id}-${Date.now()}-${i}`,
+              });
+            }
+          } else if (clampedQuantity < currentTickets) {
+            // Fjern noen tickets
+            newTickets = newTickets.slice(0, clampedQuantity);
+          }
+
+          return {
+            ...item,
+            quantity: clampedQuantity,
+            tickets: newTickets
+          };
+        }
+        return item;
+      })
+    );
+  };
+
+  const updateTicketRecipient = (ticketId: string, field: 'recipientName' | 'recipientEmail', value: string) => {
+    onCartUpdate(
+      cart.map(item => ({
+        ...item,
+        tickets: item.tickets.map(ticket =>
+          ticket.id === ticketId
+            ? { ...ticket, [field]: value }
+            : ticket
+        )
+      }))
     );
   };
 
@@ -246,6 +302,58 @@ export function TicketTypeSelector({
               {formatPrice(getTotalPrice(), safeCurrencyCode(cart[0]?.ticketType.currency || "NOK"))}
             </span>
           </div>
+        </div>
+      )}
+
+      {/* Recipient Information */}
+      {cart.length > 0 && (
+        <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+          <h4 className="font-medium text-green-900 mb-3">Mottaker informasjon</h4>
+          <div className="space-y-4">
+            {cart.map((item) =>
+              item.tickets.map((ticket, ticketIndex) => (
+                <div key={ticket.id} className="bg-white rounded-lg p-3 border border-green-100">
+                  <div className="flex items-center gap-2 mb-2">
+                    <CheckCircle className="w-4 h-4 text-green-600" />
+                    <span className="text-sm font-medium text-green-800">
+                      Billett {ticketIndex + 1} - {item.ticketType.name}
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div>
+                      <Label htmlFor={`name-${ticket.id}`} className="text-sm text-gray-700">
+                        Navn på mottaker
+                      </Label>
+                      <Input
+                        id={`name-${ticket.id}`}
+                        type="text"
+                        placeholder="F.eks. Ola Nordmann"
+                        value={ticket.recipientName}
+                        onChange={(e) => updateTicketRecipient(ticket.id, 'recipientName', e.target.value)}
+                        className="mt-1"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor={`email-${ticket.id}`} className="text-sm text-gray-700">
+                        E-post til mottaker
+                      </Label>
+                      <Input
+                        id={`email-${ticket.id}`}
+                        type="email"
+                        placeholder="F.eks. ola@example.com"
+                        value={ticket.recipientEmail}
+                        onChange={(e) => updateTicketRecipient(ticket.id, 'recipientEmail', e.target.value)}
+                        className="mt-1"
+                      />
+                    </div>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+          <p className="text-xs text-green-700 mt-3">
+            💡 La feltene stå tomme hvis billettene er til deg selv. Vi sender automatisk bekreftelse på e-post til alle mottakere etter kjøp.
+          </p>
         </div>
       )}
     </div>

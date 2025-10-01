@@ -219,6 +219,12 @@ export const purchaseTicket = mutation({
         ticketTypeId: v.id("ticketTypes"),
         quantity: v.number(),
       }))),
+      tickets: v.optional(v.array(v.object({
+        ticketTypeId: v.id("ticketTypes"),
+        recipientName: v.string(),
+        recipientEmail: v.string(),
+        id: v.string(),
+      }))),
     }),
   },
   handler: async (ctx, { eventId, userId, waitingListId, paymentInfo }) => {
@@ -296,6 +302,28 @@ export const purchaseTicket = mutation({
             currency: ticketType.currency,
           });
         }
+      }
+    } else if (paymentInfo.tickets && paymentInfo.tickets.length > 0) {
+      // Individual tickets with recipient information
+      for (const ticket of paymentInfo.tickets) {
+        await ctx.runMutation(api.ticketTypes.updateTicketTypeSoldQuantity, {
+          ticketTypeId: ticket.ticketTypeId,
+          quantityChange: 1,
+        });
+
+        const ticketType = await ctx.db.get(ticket.ticketTypeId);
+        await ctx.db.insert("tickets", {
+          eventId,
+          ticketTypeId: ticket.ticketTypeId,
+          userId,
+          purchasedAt: Date.now(),
+          status: TICKET_STATUS.VALID,
+          paymentIntentId: paymentInfo.paymentIntentId,
+          amount: ticketType ? ticketType.price : paymentInfo.amount,
+          currency: ticketType ? ticketType.currency : (paymentInfo.currency || "NOK"),
+          recipientName: ticket.recipientName,
+          recipientEmail: ticket.recipientEmail,
+        });
       }
     } else if (paymentInfo.ticketTypeId) {
       // Single ticket purchase (backward compatibility)

@@ -34,6 +34,7 @@
     "react-qr-code": "^2.0.15",
     "react-timeago": "^7.2.0",
     "recharts": "^2.15.4",
+    "resend": "^6.1.2",
     "stripe": "^17.3.1",
     "tailwind-merge": "^2.5.4",
     "tailwindcss-animate": "^1.0.7",

@@ -18,18 +18,31 @@ export type StripeCheckoutMetaData = {
     ticketTypeId: Id<"ticketTypes">;
     quantity: number;
   }>;
+  tickets?: Array<{
+    ticketTypeId: Id<"ticketTypes">;
+    recipientName: string;
+    recipientEmail: string;
+    id: string;
+  }>;
 };
 
 export async function createStripeCheckoutSession({
   eventId,
   ticketTypeId,
   cart,
+  tickets,
 }: {
   eventId: Id<"events">;
   ticketTypeId?: Id<"ticketTypes">;
   cart?: Array<{
     ticketTypeId: Id<"ticketTypes">;
     quantity: number;
+  }>;
+  tickets?: Array<{
+    ticketTypeId: Id<"ticketTypes">;
+    recipientName: string;
+    recipientEmail: string;
+    id: string;
   }>;
 }) {
   const { userId } = await auth();
@@ -172,6 +185,7 @@ export async function createStripeCheckoutSession({
     waitingListId: validQueuePosition._id,
     ticketTypeId: ticketTypeId || null,
     cart: cart ? JSON.stringify(cart) : null,
+    tickets: tickets ? JSON.stringify(tickets) : null,
   };
 
   // Create Stripe Checkout Session
