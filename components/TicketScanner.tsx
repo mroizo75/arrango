@@ -32,7 +32,7 @@ type ScanResult = {
     holder?: {
       name: string;
       email: string;
-    };
+    } | null;
   } | null;
 };
 
@@ -91,6 +91,7 @@ export function TicketScanner() {
             }, 3000);
           }
         },
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         (errorMessage) => {
           // Ignore scanning errors (happens continuously while searching for QR)
         }

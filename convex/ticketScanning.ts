@@ -17,10 +17,10 @@ export const scanTicket = mutation({
     let organizerUserId: string | undefined;
 
     // Check if scanning with access code (vaktpersonell)
-    if (args.accessCode) {
+    if (args.accessCode && args.accessCode.trim()) {
       const scanner = await ctx.db
         .query("scanners")
-        .withIndex("by_access_code", (q) => q.eq("accessCode", args.accessCode))
+        .withIndex("by_access_code", (q) => q.eq("accessCode", args.accessCode as string))
         .first();
 
       if (!scanner || !scanner.isActive) {
