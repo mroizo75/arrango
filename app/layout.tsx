@@ -119,6 +119,9 @@ export const metadata: Metadata = {
   },
   verification: {
     google: "7dVVHDDUQGxCY9Q9x643uiUrybWB5GcRmRL6yYGVPhM",
+    other: {
+      "google-site-verification": "7dVVHDDUQGxCY9Q9x643uiUrybWB5GcRmRL6yYGVPhM",
+    },
   },
 };
 
