@@ -205,7 +205,7 @@ export default function ArrangorerPage() {
               {
                 icon: CreditCard,
                 title: "Sikre betalinger",
-                desc: "Stripe og Vipps integrasjon med PCI compliance",
+                desc: "Stripe, Klarna og Swish med PCI compliance",
                 color: "green"
               },
               {
@@ -231,6 +231,12 @@ export default function ArrangorerPage() {
                 title: "Sikkerhet",
                 desc: "GDPR compliant med norsk personvern",
                 color: "gray"
+              },
+              {
+                icon: Zap,
+                title: "Regnskapsintegrasjon",
+                desc: "Automatisk fakturering med Fiken API",
+                color: "red"
               },
             ].map((feature, index) => (
               <Card key={index} className="border-0 shadow-lg hover:shadow-xl transition-shadow">

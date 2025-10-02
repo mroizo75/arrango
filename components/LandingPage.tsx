@@ -85,7 +85,7 @@ export default function LandingPage() {
               <CardContent>
                 <p className="text-gray-600">
                   Del linken til salgssiden din på sosiale medier, e-post eller nettsiden.
-                  Kunder kjøper enkelt billetter med kort eller Vipps.
+                  Kunder kjøper enkelt billetter med kort, Klarna eller Swish.
                 </p>
               </CardContent>
             </Card>
@@ -123,7 +123,7 @@ export default function LandingPage() {
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {[
               { icon: Users, title: "Ubegrenset kapasitet", desc: "Håndter arrangementer fra 10 til 10.000 deltagere" },
-              { icon: CreditCard, title: "Flere betalingsmetoder", desc: "Kort, Vipps, bankoverføring og faktura" },
+              { icon: CreditCard, title: "Flere betalingsmetoder", desc: "Kort, Klarna, Swish og faktura" },
               { icon: TrendingUp, title: "Sanntids statistikk", desc: "Følg med på salg og inntekter i dashboard" },
               { icon: Ticket, title: "QR-kode scanning", desc: "Enkel innsjekking ved arrangementet" },
               { icon: Zap, title: "Automatiske e-poster", desc: "Billetter sendes automatisk til kjøpere" },
