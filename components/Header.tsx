@@ -1,5 +1,15 @@
-import { useState } from "react";
-import { SignInButton, SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
+import React, { useState } from "react";
+import { SignInButton, SignedIn, SignedOut } from "@clerk/nextjs";
+import dynamic from "next/dynamic";
+
+// Lazy load UserButton for better initial load
+const LazyUserButton = dynamic(
+  () => import("@clerk/nextjs").then(mod => ({ default: mod.UserButton })),
+  {
+    loading: () => <div className="w-8 h-8 bg-gray-200 rounded-full animate-pulse" />,
+    ssr: false
+  }
+);
 import Image from "next/image";
 import Link from "next/link";
 import logo from "@/public/logo-light.png";
@@ -69,7 +79,7 @@ function Header({ isSeller = false }: HeaderProps) {
                   Mine billetter
                 </button>
               </Link>
-              <UserButton />
+              <LazyUserButton />
             </div>
           </SignedIn>
 

@@ -137,6 +137,7 @@ export default function RootLayout({
         {/* Essential preconnects */}
         <link rel="preconnect" href="https://ceaseless-tapir-769.convex.cloud" crossOrigin="anonymous" />
         <link rel="preconnect" href="https://js.stripe.com" crossOrigin="anonymous" />
+        <link rel="preconnect" href="https://clerk.com" crossOrigin="anonymous" />
 
         {/* Prevent layout shift for web fonts */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
