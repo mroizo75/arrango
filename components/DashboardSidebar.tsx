@@ -32,7 +32,7 @@ export function DashboardSidebar() {
   return (
     <aside className="flex h-screen w-72 flex-col border-r bg-background">
       <div className="border-b px-6 py-6">
-        <Link href="/seller" className="flex items-center gap-3">
+        <Link href="/dashboard" className="flex items-center gap-3">
           <Image
             src="/logo-light.png"
             alt="Arrango"
@@ -45,7 +45,7 @@ export function DashboardSidebar() {
           Administrer arrangementer, billetter og kunder på ett sted.
         </p>
         <Link
-          href="/seller/new-event"
+          href="/dashboard/new-event"
           className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-lg bg-blue-600 px-3 py-2 text-sm font-medium text-white hover:bg-blue-700"
         >
           <PlusCircle className="h-4 w-4" />

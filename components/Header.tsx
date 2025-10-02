@@ -53,7 +53,7 @@ function Header({ isSeller = false }: HeaderProps) {
           <SignedIn>
             <div className="flex items-center gap-3">
               {isSeller && (
-                            <Link href="/dashboard">
+                <Link href="/dashboard">
                   <button className="bg-blue-600 text-white px-3 py-1.5 text-sm rounded-lg hover:bg-blue-700 transition">
                     Dashboard
                   </button>
@@ -62,7 +62,7 @@ function Header({ isSeller = false }: HeaderProps) {
 
               <Link href="/tickets">
                 <button className="bg-gray-100 text-gray-800 px-3 py-1.5 text-sm rounded-lg hover:bg-gray-200 transition border border-gray-300">
-                  My Tickets
+                  Mine billetter
                 </button>
               </Link>
               <UserButton />
@@ -71,7 +71,7 @@ function Header({ isSeller = false }: HeaderProps) {
 
           <SignedOut>
             <div className="flex items-center gap-4">
-              <Link href="/arrangorer" className="text-gray-800 hover:text-blue-600 text-l">
+              <Link href="/arrangorer" className="text-gray-800 hover:text-blue-600 text-lg">
                 Arrangører
               </Link>
               <SignInButton mode="modal">
