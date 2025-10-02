@@ -7,6 +7,8 @@ import Footer from "@/components/Footer";
 import { Toaster } from "@/components/ui/toaster";
 import { ClerkProvider } from "@clerk/nextjs";
 import SyncUserWithConvex from "@/components/SyncUserWithConvex";
+import { CookieConsentProvider } from "@/hooks/useCookieConsent";
+import ClientWrapper from "@/components/ClientWrapper";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -103,15 +105,19 @@ export default function RootLayout({
   return (
     <html lang="nb">
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-        <ClerkProvider>
-          <ConvexClientProvider>
-            <ConditionalHeader />
-            <SyncUserWithConvex />
-            {children}
-            <Footer />
-            <Toaster />
-          </ConvexClientProvider>
-        </ClerkProvider>
+        <CookieConsentProvider>
+          <ClerkProvider>
+            <ConvexClientProvider>
+              <ConditionalHeader />
+              <SyncUserWithConvex />
+              <ClientWrapper>
+                {children}
+                <Footer />
+                <Toaster />
+              </ClientWrapper>
+            </ConvexClientProvider>
+          </ClerkProvider>
+        </CookieConsentProvider>
       </body>
     </html>
   );

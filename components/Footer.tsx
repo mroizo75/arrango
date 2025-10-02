@@ -22,7 +22,7 @@ export default function Footer() {
           </p>
           <div className="flex items-center gap-4 text-muted-foreground">
             <Link href="mailto:team@arrango.app" className="flex items-center gap-2">
-              <Mail className="h-4 w-4" /> team@arrango.no
+              <Mail className="h-4 w-4" /> kai@kksas.no
             </Link>
             <span className="flex items-center gap-2">
               <Link href="tel:+4791540854" className="flex items-center gap-2">
@@ -72,35 +72,11 @@ export default function Footer() {
         </div>
       </div>
 
-      {/* Payment Methods
-      <div className="border-t bg-background">
-        <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-4 py-8 md:flex-row md:items-center md:justify-between">
-          <div className="flex flex-col gap-3">
-            <span className="text-sm font-semibold text-foreground">Betalingsmetoder</span>
-            <div className="flex items-center gap-4">
-              <div className="flex items-center gap-2 px-3 py-2 bg-white rounded border text-sm">
-                <Image src="/visa.svg" alt="Visa" width={35} height={35} />
-              </div>
-              <div className="flex items-center gap-2 px-3 py-2 bg-white rounded border text-sm">
-                <Image src="/mastercard.svg" alt="Mastercard" width={35} height={35} />
-              </div>
-              <div className="flex items-center gap-2 px-3 py-2 bg-white rounded border text-sm">
-                <Image src="/klarna.svg" alt="Klarna" width={35} height={35} />
-              </div>
-              <div className="flex items-center gap-2 px-3 py-2 bg-white rounded border text-sm">
-                <Image src="/swish.svg" alt="Swish" width={35} height={35} />
-              </div>
-            </div>
-            <p className="text-xs text-muted-foreground">
-              Vi støtter sikre betalingsmetoder for alle kunder
-            </p>
-          </div>
-        </div>
-      </div> */}
+     
 
       <div className="border-t bg-background">
         <div className="mx-auto flex w-full max-w-6xl flex-col gap-2 px-4 py-6 text-xs text-muted-foreground md:flex-row md:items-center md:justify-between">
-          <p>© {year} arrango. Built for event creators everywhere.</p>
+          <p>© {year} arrango. Built for event creators everywhere.</p><a href="https://www.kksas.no" className="hover:text-foreground">Built by KKS AS</a>
           <div className="flex items-center gap-3">
             <Link href="/privacy" className="hover:text-foreground">
               Privacy
@@ -111,6 +87,16 @@ export default function Footer() {
             <Link href="/cookies" className="hover:text-foreground">
               Cookies
             </Link>
+            <button
+              onClick={() => {
+                // Trigger cookie preferences modal
+                const event = new CustomEvent('openCookiePreferences');
+                window.dispatchEvent(event);
+              }}
+              className="hover:text-foreground"
+            >
+              Cookie-innstillinger
+            </button>
           </div>
         </div>
       </div>

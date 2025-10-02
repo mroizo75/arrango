@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import CookiesPageClient from "./CookiesPageClient";
 
 export const metadata: Metadata = {
   title: "Cookiepolicy | Arrango",
@@ -27,12 +28,15 @@ export const metadata: Metadata = {
   },
 };
 
-export default function CookiesPage() {
+function CookiesPageContent() {
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="bg-white rounded-lg shadow-sm p-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-8">Cookiepolicy</h1>
+          <div className="flex items-center justify-between mb-8">
+            <h1 className="text-3xl font-bold text-gray-900">Cookiepolicy</h1>
+            <CookiesPageClient />
+          </div>
 
           <div className="prose prose-gray max-w-none">
             <p className="text-gray-600 mb-6">
@@ -170,4 +174,8 @@ export default function CookiesPage() {
       </div>
     </div>
   );
+}
+
+export default function CookiesPage() {
+  return <CookiesPageContent />;
 }
