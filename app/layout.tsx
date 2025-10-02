@@ -134,11 +134,9 @@ export default function RootLayout({
   return (
     <html lang="nb">
       <head>
-        {/* Performance optimizations */}
+        {/* Essential preconnects */}
         <link rel="preconnect" href="https://ceaseless-tapir-769.convex.cloud" crossOrigin="anonymous" />
-        <link rel="preconnect" href="https://hushed-eel-616.convex.cloud" crossOrigin="anonymous" />
         <link rel="preconnect" href="https://js.stripe.com" crossOrigin="anonymous" />
-        <link rel="preconnect" href="https://clerk.com" crossOrigin="anonymous" />
 
         {/* Prevent layout shift for web fonts */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -153,20 +151,9 @@ export default function RootLayout({
           crossOrigin="anonymous"
         />
 
-        {/* Prevent flash of unstyled text */}
+        {/* Critical CSS for font loading */}
         <style dangerouslySetInnerHTML={{
           __html: `
-            /* Prevent layout shift */
-            * {
-              box-sizing: border-box;
-            }
-
-            /* Reserve space for images */
-            img {
-              aspect-ratio: auto;
-            }
-
-            /* Optimize font loading */
             @font-face {
               font-family: 'Geist';
               font-style: normal;
