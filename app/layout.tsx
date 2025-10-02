@@ -9,6 +9,7 @@ import { ClerkProvider } from "@clerk/nextjs";
 import SyncUserWithConvex from "@/components/SyncUserWithConvex";
 import { CookieConsentProvider } from "@/hooks/useCookieConsent";
 import ClientWrapper from "@/components/ClientWrapper";
+import ServiceWorker from "@/components/ServiceWorker";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -130,12 +131,38 @@ export default function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="nb">
+      <head>
+        {/* Preload critical fonts for better performance */}
+        <link
+          rel="preload"
+          href="/fonts/GeistVF.woff"
+          as="font"
+          type="font/woff"
+          crossOrigin="anonymous"
+        />
+        <link
+          rel="preload"
+          href="/fonts/GeistMonoVF.woff"
+          as="font"
+          type="font/woff"
+          crossOrigin="anonymous"
+        />
+        {/* DNS prefetch for external resources */}
+        <link rel="dns-prefetch" href="//fonts.googleapis.com" />
+        <link rel="dns-prefetch" href="//fonts.gstatic.com" />
+        {/* Preconnect to critical origins */}
+        <link rel="preconnect" href="https://ceaseless-tapir-769.convex.cloud" crossOrigin="anonymous" />
+        <link rel="preconnect" href="https://hushed-eel-616.convex.cloud" crossOrigin="anonymous" />
+        <link rel="preconnect" href="https://js.stripe.com" crossOrigin="anonymous" />
+        <link rel="preconnect" href="https://clerk.com" crossOrigin="anonymous" />
+      </head>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <CookieConsentProvider>
           <ClerkProvider>
             <ConvexClientProvider>
               <ConditionalHeader />
               <SyncUserWithConvex />
+              <ServiceWorker />
               <ClientWrapper>
                 {children}
                 <Footer />
