@@ -44,6 +44,21 @@ const nextConfig: NextConfig = {
   experimental: {
     webVitalsAttribution: ['CLS', 'LCP'],
   },
+
+  // Optimize JavaScript compilation for modern browsers
+  compiler: {
+    removeConsole: process.env.NODE_ENV === 'production',
+  },
+
+  // Optimize CSS loading
+  optimizeFonts: true,
+
+  // Target modern browsers to reduce polyfills
+  browserslist: [
+    '>0.3%',
+    'not ie 11',
+    'not dead',
+  ],
 };
 
 export default nextConfig;
