@@ -123,6 +123,9 @@ export const metadata: Metadata = {
       "google-site-verification": "7dVVHDDUQGxCY9Q9x643uiUrybWB5GcRmRL6yYGVPhM",
     },
   },
+  other: {
+    "cache-control": "public, max-age=3600, s-maxage=3600",
+  },
 };
 
 export default function RootLayout({
@@ -131,9 +134,46 @@ export default function RootLayout({
   return (
     <html lang="nb">
       <head>
-        {/* Minimal resource hints for performance */}
+        {/* Performance optimizations */}
         <link rel="preconnect" href="https://ceaseless-tapir-769.convex.cloud" crossOrigin="anonymous" />
         <link rel="preconnect" href="https://js.stripe.com" crossOrigin="anonymous" />
+
+        {/* Prevent layout shift for web fonts */}
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
+
+        {/* Preload critical resources */}
+        <link
+          rel="preload"
+          href="/fonts/GeistVF.woff"
+          as="font"
+          type="font/woff"
+          crossOrigin="anonymous"
+        />
+
+        {/* Prevent flash of unstyled text */}
+        <style dangerouslySetInnerHTML={{
+          __html: `
+            /* Prevent layout shift */
+            * {
+              box-sizing: border-box;
+            }
+
+            /* Reserve space for images */
+            img {
+              aspect-ratio: auto;
+            }
+
+            /* Optimize font loading */
+            @font-face {
+              font-family: 'Geist';
+              font-style: normal;
+              font-weight: 100 900;
+              font-display: swap;
+              src: url('/fonts/GeistVF.woff') format('woff');
+            }
+          `
+        }} />
       </head>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <CookieConsentProvider>

@@ -1,5 +1,6 @@
 "use client";
 
+import React from "react";
 import { api } from "@/convex/_generated/api";
 import { useQuery } from "convex/react";
 import { Id } from "@/convex/_generated/dataModel";
@@ -72,13 +73,9 @@ function OrganizerCard({ organizer }: OrganizerCardProps) {
   );
 }
 
-export default function EventList({ limit, showFeaturedOrganizers = false, showCTA = false }: EventListProps) {
-  const events = useQuery(api.events.getUpcomingEventsWithImages, {
-    limit: limit || 12
-  });
-  const organizers = useQuery(api.organizerProfile.getFeaturedOrganizers, {
-    limit: 6
-  });
+const EventList = React.memo(function EventList({ limit, showFeaturedOrganizers = false, showCTA = false }: EventListProps) {
+  const events = useQuery(api.events.get);
+  const organizers = useQuery(api.organizerProfile.getFeaturedOrganizers);
 
   if (!events) {
     return (
@@ -193,4 +190,6 @@ export default function EventList({ limit, showFeaturedOrganizers = false, showC
       )}
     </div>
   );
-}
+});
+
+export default EventList;
