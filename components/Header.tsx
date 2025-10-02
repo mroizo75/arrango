@@ -32,6 +32,8 @@ function Header({ isSeller = false }: HeaderProps) {
               <button
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
                 className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
+                aria-label={isMobileMenuOpen ? "Lukk meny" : "Åpne meny"}
+                aria-expanded={isMobileMenuOpen}
               >
                 {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
               </button>
@@ -40,6 +42,8 @@ function Header({ isSeller = false }: HeaderProps) {
               <button
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
                 className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
+                aria-label={isMobileMenuOpen ? "Lukk meny" : "Åpne meny"}
+                aria-expanded={isMobileMenuOpen}
               >
                 {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
               </button>
