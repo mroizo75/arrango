@@ -3,7 +3,6 @@ import { SignInButton, SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
 import Image from "next/image";
 import Link from "next/link";
 import logo from "@/public/logo-light.png";
-import SearchBar from "./SearchBar";
 import { Menu, X } from "lucide-react";
 
 interface HeaderProps {
@@ -48,12 +47,6 @@ function Header({ isSeller = false }: HeaderProps) {
           </div>
         </div>
 
-        {/* Search Bar - Only for logged in users */}
-        <SignedIn>
-          <div className="w-full lg:max-w-2xl">
-            <SearchBar />
-          </div>
-        </SignedIn>
 
 
         <div className="hidden lg:block ml-auto">

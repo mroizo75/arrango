@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { CheckCircle, Ticket, CreditCard, TrendingUp, Users, Zap, Star, Award, Shield } from "lucide-react";
 import Link from "next/link";
-import { SignInButton } from "@clerk/nextjs";
+import { SignInButton, SignUpButton } from "@clerk/nextjs";
 
 export default function ArrangorerPage() {
   return (
@@ -29,11 +29,11 @@ export default function ArrangorerPage() {
               </p>
               <div className="flex flex-col sm:flex-row gap-4">
 
-                  <SignInButton mode="modal">
+                  <SignUpButton mode="modal">
                     <Button size="lg" className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 text-lg">
                       Kom i gang gratis →
                     </Button>
-                  </SignInButton>
+                  </SignUpButton>
 
                 <Link href="#features">
                   <Button variant="outline" size="lg" className="px-8 py-3 text-lg">
@@ -373,11 +373,11 @@ export default function ArrangorerPage() {
                   </div>
                 </div>
                 <div className="w-full">
-                  <SignInButton mode="modal">
+                  <SignUpButton mode="modal">
                     <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white mt-6">
                       Start gratis nå
                     </Button>
-                  </SignInButton>
+                  </SignUpButton>
                 </div>
               </CardContent>
             </Card>
@@ -474,11 +474,11 @@ export default function ArrangorerPage() {
             Ingen risiko, ingen bindingstid.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <SignInButton mode="modal">
+            <SignUpButton mode="modal">
               <Button size="lg" className="bg-white text-blue-600 hover:bg-blue-100 hover:text-blue-600 px-8 py-3">
                 Start gratis nå →
               </Button>
-            </SignInButton>
+            </SignUpButton>
             <Link href="mailto:support@arrango.no">
               <Button variant="outline" size="lg" className="border-white text-blue-600 hover:bg-blue-600 hover:text-white px-8 py-3">
                 Kontakt oss
