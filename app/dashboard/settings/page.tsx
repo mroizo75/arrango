@@ -1,8 +1,8 @@
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
-import LazyOrganizerProfileForm from "@/components/LazyOrganizerProfileForm";
-import LazyFikenSettings from "@/components/LazyFikenSettings";
-import LazyStripeConnectSettings from "@/components/LazyStripeConnectSettings";
+import { OrganizerProfileForm } from "@/components/OrganizerProfileForm";
+import FikenSettings from "@/components/FikenSettings";
+import StripeConnectSettings from "@/components/StripeConnectSettings";
 import {
   Card,
   CardContent,
@@ -33,13 +33,13 @@ export default async function SellerSettingsPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <LazyOrganizerProfileForm />
+          <OrganizerProfileForm />
         </CardContent>
       </Card>
 
-      <LazyFikenSettings />
+      <FikenSettings />
 
-      <LazyStripeConnectSettings />
+      <StripeConnectSettings />
 
       <Card>
         <CardHeader>
