@@ -73,8 +73,12 @@ function OrganizerCard({ organizer }: OrganizerCardProps) {
 }
 
 export default function EventList({ limit, showFeaturedOrganizers = false, showCTA = false }: EventListProps) {
-  const events = useQuery(api.events.get);
-  const organizers = useQuery(api.organizerProfile.getFeaturedOrganizers);
+  const events = useQuery(api.events.getUpcomingEventsWithImages, {
+    limit: limit || 12
+  });
+  const organizers = useQuery(api.organizerProfile.getFeaturedOrganizers, {
+    limit: 6
+  });
 
   if (!events) {
     return (

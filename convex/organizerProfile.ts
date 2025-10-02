@@ -287,39 +287,70 @@ export const getOrganizerEvents = query({
 });
 
 export const getFeaturedOrganizers = query({
-  handler: async (ctx) => {
-    // Get all users who have organizer profiles and events
-    const users = await ctx.db.query("users").collect();
+  args: { limit: v.optional(v.number()) },
+  handler: async (ctx, { limit = 6 }) => {
+    // Get all upcoming events with images to find active organizers
+    const eventsWithImages = await ctx.db
+      .query("events")
+      .filter((q) =>
+        q.and(
+          q.neq(q.field("imageStorageId"), undefined),
+          q.eq(q.field("is_cancelled"), undefined),
+          q.gt(q.field("eventDate"), Date.now()) // Only upcoming events
+        )
+      )
+      .collect();
 
+    // Group by userId and count events, find latest image
+    const organizerStats = new Map();
+
+    for (const event of eventsWithImages) {
+      const userId = event.userId;
+      if (!organizerStats.has(userId)) {
+        organizerStats.set(userId, {
+          eventCount: 0,
+          latestEventImage: null,
+          latestEventDate: 0
+        });
+      }
+
+      const stats = organizerStats.get(userId)!;
+      stats.eventCount++;
+
+      // Update latest event image if this event is more recent
+      if (event.eventDate > stats.latestEventDate) {
+        stats.latestEventImage = event.imageStorageId;
+        stats.latestEventDate = event.eventDate;
+      }
+    }
+
+    // Get user details for organizers with events
     const organizersWithEvents = [];
 
-    for (const user of users) {
-      // Check if user has events
-      const events = await ctx.db
-        .query("events")
-        .filter((q) => q.eq(q.field("userId"), user.userId))
-        .collect();
+    for (const [userId, stats] of organizerStats) {
+      const user = await ctx.db
+        .query("users")
+        .filter((q) => q.eq(q.field("userId"), userId))
+        .first();
 
-      if (events.length > 0) {
-        // Find the most recent event with an image
-        const eventsWithImages = events
-          .filter(event => event.imageStorageId)
-          .sort((a, b) => b.eventDate - a.eventDate); // Sort by date descending
-
-        const latestEventImage = eventsWithImages.length > 0 ? eventsWithImages[0].imageStorageId : null;
-
+      if (user && user.organizerName) {
         organizersWithEvents.push({
-          userId: user.userId,
-          organizerName: user.organizerName || null,
+          userId,
+          organizerName: user.organizerName,
           organizerSlug: user.organizerSlug || null,
-          eventCount: events.length,
-          latestEventImage: latestEventImage,
+          eventCount: stats.eventCount,
+          latestEventImage: stats.latestEventImage,
         });
       }
     }
 
-    // Shuffle the array to randomize featured organizers
-    const shuffled = [...organizersWithEvents];
+    // Sort by event count and take top N, then shuffle for variety
+    const topOrganizers = organizersWithEvents
+      .sort((a, b) => b.eventCount - a.eventCount)
+      .slice(0, limit);
+
+    // Shuffle for variety (same logic as before)
+    const shuffled = [...topOrganizers];
     for (let i = shuffled.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
       [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];

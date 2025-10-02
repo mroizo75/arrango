@@ -32,6 +32,49 @@ export const get = query({
   },
 });
 
+export const getUpcomingEvents = query({
+  args: { limit: v.optional(v.number()) },
+  handler: async (ctx, { limit = 20 }) => {
+    const now = Date.now();
+    return await ctx.db
+      .query("events")
+      .filter((q) =>
+        q.and(
+          q.eq(q.field("is_cancelled"), undefined),
+          q.gt(q.field("eventDate"), now)
+        )
+      )
+      .take(limit);
+  },
+});
+
+export const getUpcomingEventsWithImages = query({
+  args: { limit: v.optional(v.number()) },
+  handler: async (ctx, { limit = 12 }) => {
+    const now = Date.now();
+    const events = await ctx.db
+      .query("events")
+      .filter((q) =>
+        q.and(
+          q.eq(q.field("is_cancelled"), undefined),
+          q.gt(q.field("eventDate"), now)
+        )
+      )
+      .take(limit);
+
+    // Only include necessary fields for EventList
+    return events.map(event => ({
+      _id: event._id,
+      name: event.name,
+      location: event.location,
+      eventDate: event.eventDate,
+      imageStorageId: event.imageStorageId,
+      price: event.price,
+      currency: event.currency,
+    }));
+  },
+});
+
 export const getById = query({
   args: { eventId: v.id("events") },
   handler: async (ctx, { eventId }) => {
