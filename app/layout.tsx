@@ -121,7 +121,7 @@ export const metadata: Metadata = {
     },
   },
   verification: {
-    google: "google-site-verification-code-here", // TODO: Add when domain is set up
+    google: "7dVVHDDUQGxCY9Q9x643uiUrybWB5GcRmRL6yYGVPhM",
   },
 };
 
