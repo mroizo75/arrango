@@ -81,9 +81,6 @@ export const metadata: Metadata = {
       },
     ],
   },
-  verification: {
-    google: "7dVVHDDUQGxCY9Q9x643uiUrybWB5GcRmRL6yYGVPhM",
-  },
   openGraph: {
     title: "Arrango - Billetter til arrangementer verden over",
     description: "Finn og kjøp billetter til de beste arrangementene over hele verden. Sikker billettkjøp med Stripe. Støtter flere valutaer. Gratis for arrangører!",
