@@ -1,8 +1,12 @@
 "use client";
 
 import { createStripeCheckoutSession } from "@/app/actions/createStripeCheckoutSession";
+import { createDirectPurchase } from "@/app/actions/createDirectPurchase";
 import { Id } from "@/convex/_generated/dataModel";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Label } from "@/components/ui/label";
+import { CreditCard, FileText } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useUser } from "@clerk/nextjs";
 import { api } from "@/convex/_generated/api";
@@ -23,6 +27,7 @@ export default function PurchaseTicket({ eventId }: { eventId: Id<"events"> }) {
     eventId,
     userId: user?.id ?? "",
   });
+
 
   const [timeRemaining, setTimeRemaining] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -62,6 +67,18 @@ export default function PurchaseTicket({ eventId }: { eventId: Id<"events"> }) {
   const offerExpiresAt = queuePosition?.offerExpiresAt ?? 0;
   const isExpired = Date.now() > offerExpiresAt;
 
+  const totalPrice = useMemo(() => {
+    return cart.reduce((total, item) =>
+      total + (item.ticketType.price * item.quantity), 0
+    );
+  }, [cart]);
+
+  // Klarna er tilgjengelig for alle kunder når det er aktivert på plattform-nivå
+  const canUseKlarna = totalPrice > 0; // Klarna håndterer selv land og tilgjengelighet
+  const canUseCard = totalPrice > 0;
+
+  const [paymentMethod, setPaymentMethod] = useState<'card' | 'klarna'>('card');
+
   useEffect(() => {
     const calculateTimeRemaining = () => {
       if (isExpired) {
@@ -95,6 +112,7 @@ export default function PurchaseTicket({ eventId }: { eventId: Id<"events"> }) {
     try {
       setIsLoading(true);
 
+
       // Send individual tickets with recipient info for bulk purchase
       const allTickets = cart.flatMap(item =>
         item.tickets.map(ticket => ({
@@ -105,13 +123,30 @@ export default function PurchaseTicket({ eventId }: { eventId: Id<"events"> }) {
         }))
       );
 
-      const { sessionUrl } = await createStripeCheckoutSession({
-        eventId,
-        tickets: allTickets,
-      });
+      if (totalPrice === 0) {
+        // Free tickets - create directly without Stripe
+        const directPurchase = await createDirectPurchase({
+          eventId,
+          tickets: allTickets,
+          userId: user.id,
+        });
 
-      if (sessionUrl) {
-        router.push(sessionUrl);
+        if (directPurchase.success) {
+          router.push(`/tickets/purchase-success?free=true`);
+        } else {
+          throw new Error(directPurchase.error || "Failed to create free tickets");
+        }
+                  } else {
+                    // Paid tickets - use Stripe
+                    const { sessionUrl } = await createStripeCheckoutSession({
+                      eventId,
+                      tickets: allTickets,
+                      paymentMethod: paymentMethod === 'klarna' ? 'invoice' : 'card',
+                    });
+
+        if (sessionUrl) {
+          router.push(sessionUrl);
+        }
       }
     } catch (error) {
       console.error("Error creating checkout session:", error);
@@ -165,16 +200,43 @@ export default function PurchaseTicket({ eventId }: { eventId: Id<"events"> }) {
           />
         </div>
 
+        {/* Payment Method Selection */}
+        {canUseCard && canUseKlarna && (
+          <div className="bg-white rounded-lg p-4 border border-gray-200">
+            <h4 className="font-medium text-gray-900 mb-3">Betalingsmetode</h4>
+            <RadioGroup value={paymentMethod} onValueChange={(value) => setPaymentMethod(value as 'card' | 'klarna')}>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="card" id="card" />
+                <Label htmlFor="card" className="flex items-center gap-2 cursor-pointer">
+                  <CreditCard className="w-4 h-4" />
+                  Kortbetaling (Visa, Mastercard)
+                </Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="klarna" id="klarna" />
+                <Label htmlFor="klarna" className="flex items-center gap-2 cursor-pointer">
+                  <FileText className="w-4 h-4" />
+                  Klarna (Pay in 3, Pay later, etc.)
+                </Label>
+              </div>
+            </RadioGroup>
+          </div>
+        )}
+
         <button
           onClick={handlePurchase}
           disabled={isExpired || isLoading || cart.length === 0}
-          className="w-full bg-gradient-to-r from-amber-500 to-amber-600 text-white px-8 py-4 rounded-lg font-bold shadow-md hover:from-amber-600 hover:to-amber-700 transform hover:scale-[1.02] transition-all duration-200 disabled:from-gray-400 disabled:to-gray-500 disabled:cursor-not-allowed disabled:hover:scale-100 text-lg"
+          className={`w-full px-8 py-4 rounded-lg font-bold shadow-md transform hover:scale-[1.02] transition-all duration-200 disabled:from-gray-400 disabled:to-gray-500 disabled:cursor-not-allowed disabled:hover:scale-100 text-lg ${
+            totalPrice === 0
+              ? "bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white"
+              : "bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white"
+          }`}
         >
           {isLoading
-            ? "Redirecting to checkout..."
-            : userTicket
-            ? "Kjøp flere billetter nå →"
-            : "Purchase Your Ticket Now →"}
+            ? "Behandler..."
+            : totalPrice === 0
+            ? (userTicket ? "Registrer flere gratis billetter →" : "Registrer gratis billett →")
+            : (userTicket ? "Kjøp flere billetter nå →" : "Purchase Your Ticket Now →")}
         </button>
 
         {queuePosition && (

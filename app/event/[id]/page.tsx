@@ -182,7 +182,7 @@ export default function EventPage() {
               {/* Right Column - Ticket Purchase Card */}
               <div>
                 <div className="sticky top-8 space-y-4">
-                  <EventCard eventId={params.id as Id<"events">} />
+                  <EventCard eventId={params.id as Id<"events">} showAdditionalPurchase={true} />
 
                   {user ? (
                     <JoinQueue

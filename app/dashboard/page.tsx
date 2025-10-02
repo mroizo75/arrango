@@ -1,4 +1,4 @@
-import { SellerDashboardPage } from "@/components/SellerDashboardPage";
+import { DashboardPage } from "@/components/DashboardPage";
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { getSellerDashboardData } from "@/app/actions/getSellerDashboardData";
@@ -50,7 +50,7 @@ export default async function SellerPage({
           </div>
         </header>
         <section className="flex-1 px-8 py-6">
-          <SellerDashboardPage
+          <DashboardPage
             overview={dashboardData.overview}
             customers={dashboardData.customersFormatted}
             salesTrend={dashboardData.salesTrend}

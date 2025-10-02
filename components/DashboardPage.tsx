@@ -83,7 +83,7 @@ type SellerDashboardPageProps = {
   currentPage: number;
 };
 
-export function SellerDashboardPage({
+export function DashboardPage({
   overview,
   customers,
   salesTrend,

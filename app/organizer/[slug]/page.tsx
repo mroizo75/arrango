@@ -4,7 +4,6 @@ import { useParams } from "next/navigation";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { useStorageUrl } from "@/lib/hooks";
-import EventCard from "@/components/EventCard";
 import Spinner from "@/components/Spinner";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -18,8 +17,121 @@ import {
   Instagram,
   Twitter,
   Linkedin,
+  MapPin,
+  Clock,
 } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
+
+interface EventItemProps {
+  event: {
+    _id: string;
+    name: string;
+    eventDate: number;
+    location: string;
+    imageStorageId?: string;
+    price?: number;
+  };
+}
+
+function EventItem({ event }: EventItemProps) {
+  const eventDate = new Date(event.eventDate);
+  const eventImageUrl = useStorageUrl(event.imageStorageId);
+  const dayName = eventDate.toLocaleDateString('nb-NO', { weekday: 'long' });
+  const dayNumber = eventDate.getDate();
+  const monthShort = eventDate.toLocaleDateString('nb-NO', { month: 'short' });
+  const timeString = eventDate.toLocaleTimeString('nb-NO', {
+    hour: '2-digit',
+    minute: '2-digit'
+  });
+
+  return (
+    <div className="bg-white rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 border border-gray-200 hover:border-gray-300 overflow-hidden min-h-[200px]">
+      <div className="flex flex-col lg:flex-row relative">
+        {/* Event Image */}
+        <div className="lg:w-64 h-full min-h-[200px] flex-shrink-0 relative lg:absolute lg:inset-y-0 lg:left-0">
+          {eventImageUrl ? (
+            <Image
+              src={eventImageUrl}
+              alt={event.name}
+              fill
+              className="object-cover"
+            />
+          ) : (
+            <div className="w-full h-full bg-gradient-to-br from-blue-100 to-purple-100 flex items-center justify-center">
+              <Calendar className="w-16 h-16 text-gray-400" />
+            </div>
+          )}
+          {/* Date overlay - on image for mobile, moved to card for desktop */}
+          <div className="absolute top-4 left-4 bg-black/80 backdrop-blur-sm rounded-lg px-3 py-2 shadow-lg border border-white/20 lg:hidden">
+            <div className="text-sm font-semibold text-white capitalize">
+              {dayName}
+            </div>
+            <div className="text-2xl font-bold text-white">
+              {dayNumber}
+            </div>
+            <div className="text-sm text-gray-200 uppercase">
+              {monthShort}
+            </div>
+          </div>
+        </div>
+
+        {/* Date overlay on card for desktop */}
+        <div className="hidden lg:block absolute top-4 right-4 lg:right-6 bg-black/80 backdrop-blur-sm rounded-lg px-3 py-2 shadow-lg border border-white/20">
+          <div className="text-sm font-semibold text-white capitalize">
+            {dayName}
+          </div>
+          <div className="text-2xl font-bold text-white">
+            {dayNumber}
+          </div>
+          <div className="text-sm text-gray-200 uppercase">
+            {monthShort}
+          </div>
+          </div>
+
+        {/* Event Info */}
+        <div className="flex-1 p-6 lg:p-8 flex flex-col justify-between lg:ml-64 lg:pl-8">
+          <div>
+            {/* Event Title */}
+            <h3 className="text-2xl lg:text-3xl font-bold text-gray-900 mb-4 leading-tight">
+              {event.name}
+            </h3>
+
+            {/* Badges for time and location */}
+            <div className="flex flex-wrap gap-3 mb-6">
+              <div className="flex items-center gap-2 bg-blue-50 text-blue-700 px-4 py-2 rounded-full">
+                <Clock className="w-4 h-4" />
+                <span className="font-medium">{timeString}</span>
+              </div>
+              <div className="flex items-center gap-2 bg-green-50 text-green-700 px-4 py-2 rounded-full">
+                <MapPin className="w-4 h-4" />
+                <span className="font-medium">{event.location}</span>
+              </div>
+            </div>
+
+            {/* Price */}
+            {event.price && event.price > 0 && (
+              <div className="text-xl font-bold text-blue-600 mb-4">
+                Fra {Math.round(event.price / 100)} kr
+              </div>
+            )}
+          </div>
+
+          {/* CTA Button */}
+          <Link
+            href={`/event/${event._id}`}
+            className="inline-flex items-center justify-center w-full lg:w-auto px-4 py-2 bg-black/80 backdrop-blur-sm text-white font-medium rounded-md border border-white/20 shadow-lg hover:bg-black/90 transition-all duration-200 text-sm"
+          >
+            Finn billetter
+            <svg className="w-3 h-3 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
+          </Link>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export default function OrganizerPage() {
   const params = useParams();
@@ -56,76 +168,110 @@ export default function OrganizerPage() {
     );
   }
 
-  const upcomingEvents = events?.filter(event => event.eventDate >= Date.now()) || [];
-  const pastEvents = events?.filter(event => event.eventDate < Date.now()) || [];
+  // Filter and sort upcoming events by date (newest first)
+  const upcomingEvents = events
+    ?.filter(event => event.eventDate >= Date.now())
+    .sort((a, b) => a.eventDate - b.eventDate) || []; // Sort ascending (earliest first)
+
+  // Group events by month
+  const eventsByMonth = upcomingEvents.reduce((acc, event) => {
+    const date = new Date(event.eventDate);
+    const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+    const monthName = date.toLocaleDateString('nb-NO', { month: 'long', year: 'numeric' });
+
+    if (!acc[monthKey]) {
+      acc[monthKey] = {
+        monthName,
+        events: []
+      };
+    }
+
+    acc[monthKey].events.push(event);
+    return acc;
+  }, {} as Record<string, { monthName: string; events: typeof upcomingEvents }>);
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-white">
       {/* Header Section */}
-      <div className="bg-white border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          <div className="flex flex-col md:flex-row gap-8 items-start">
+      <div className="bg-gradient-to-br from-blue-50 to-white border-b border-gray-100">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+          <div className="flex flex-col md:flex-row gap-12 items-start">
             {/* Logo/Profile Image */}
             <div className="flex-shrink-0">
               {logoUrl ? (
-                <Image
-                  src={logoUrl}
-                  alt={organizer.organizerName || "Arrangør logo"}
-                  width={120}
-                  height={120}
-                  className="rounded-lg object-cover border"
-                />
+                <div className="relative">
+                  <Image
+                    src={logoUrl}
+                    alt={organizer.organizerName || "Arrangør logo"}
+                    width={160}
+                    height={160}
+                    className="rounded-xl object-cover border-4 border-white shadow-lg"
+                  />
+                  {organizer.organizerVerified && (
+                    <div className="absolute -bottom-2 -right-2 bg-blue-600 text-white rounded-full p-2">
+                      <CheckCircle className="w-5 h-5" />
+                    </div>
+                  )}
+                </div>
               ) : (
-                <div className="w-30 h-30 bg-gray-200 rounded-lg flex items-center justify-center">
-                  <Users className="w-12 h-12 text-gray-400" />
+                <div className="w-40 h-40 bg-gradient-to-br from-gray-100 to-gray-200 rounded-xl flex items-center justify-center border-4 border-white shadow-lg">
+                  <Users className="w-16 h-16 text-gray-500" />
                 </div>
               )}
             </div>
 
             {/* Organizer Info */}
             <div className="flex-1">
-              <div className="flex items-center gap-3 mb-2">
-                <h1 className="text-3xl font-bold text-gray-900">
+              <div className="flex items-center gap-4 mb-4">
+                <h1 className="text-4xl md:text-5xl font-bold text-gray-900">
                   {organizer.organizerName}
                 </h1>
                 {organizer.organizerVerified && (
-                  <Badge className="bg-blue-100 text-blue-800">
-                    <CheckCircle className="w-3 h-3 mr-1" />
-                    Verifisert
+                  <Badge className="bg-blue-600 text-white px-3 py-1 text-sm font-medium">
+                    Verifisert arrangør
                   </Badge>
                 )}
               </div>
 
               {organizer.organizerBio && (
-                <p className="text-xl text-gray-600 mb-4">{organizer.organizerBio}</p>
+                <p className="text-xl text-gray-700 mb-6 leading-relaxed">{organizer.organizerBio}</p>
               )}
 
               {/* Stats */}
-              <div className="flex flex-wrap gap-6 mb-6">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-8">
                 {organizer.organizerEventCount && (
-                  <div className="flex items-center gap-2">
-                    <Calendar className="w-5 h-5 text-gray-400" />
-                    <span className="text-sm text-gray-600">
-                      {organizer.organizerEventCount} arrangementer
-                    </span>
+                  <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-100">
+                    <div className="flex items-center gap-3">
+                      <Calendar className="w-6 h-6 text-blue-600" />
+                      <div>
+                        <div className="text-2xl font-bold text-gray-900">{organizer.organizerEventCount}</div>
+                        <div className="text-sm text-gray-600">Arrangementer</div>
+                      </div>
+                    </div>
                   </div>
                 )}
 
                 {organizer.organizerRating && (
-                  <div className="flex items-center gap-2">
-                    <Star className="w-5 h-5 text-yellow-400" />
-                    <span className="text-sm text-gray-600">
-                      {organizer.organizerRating.toFixed(1)} ({organizer.organizerReviewCount} anmeldelser)
-                    </span>
+                  <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-100">
+                    <div className="flex items-center gap-3">
+                      <Star className="w-6 h-6 text-yellow-500" />
+                      <div>
+                        <div className="text-2xl font-bold text-gray-900">{organizer.organizerRating.toFixed(1)}</div>
+                        <div className="text-sm text-gray-600">{organizer.organizerReviewCount} anmeldelser</div>
+                      </div>
+                    </div>
                   </div>
                 )}
 
                 {organizer.organizerFollowerCount && (
-                  <div className="flex items-center gap-2">
-                    <Users className="w-5 h-5 text-gray-400" />
-                    <span className="text-sm text-gray-600">
-                      {organizer.organizerFollowerCount} følgere
-                    </span>
+                  <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-100">
+                    <div className="flex items-center gap-3">
+                      <Users className="w-6 h-6 text-purple-600" />
+                      <div>
+                        <div className="text-2xl font-bold text-gray-900">{organizer.organizerFollowerCount}</div>
+                        <div className="text-sm text-gray-600">Følgere</div>
+                      </div>
+                    </div>
                   </div>
                 )}
               </div>
@@ -218,49 +364,76 @@ export default function OrganizerPage() {
       </div>
 
       {/* Events Section */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        {/* Upcoming Events */}
-        {upcomingEvents.length > 0 && (
-          <div className="mb-12">
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">
-              Kommende arrangementer
-            </h2>
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-              {upcomingEvents.map((event) => (
-                <EventCard key={event._id} eventId={event._id} />
-              ))}
-            </div>
-          </div>
-        )}
+      <div className="bg-gray-50 border-t border-gray-100">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+          {upcomingEvents.length > 0 ? (
+            <div className="space-y-16">
+              <div className="text-center mb-12">
+                <h2 className="text-3xl font-bold text-gray-900 mb-4">
+                  Kommende arrangementer
+                </h2>
+                <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+                  Se hva {organizer.organizerName} har planlagt for deg
+                </p>
+              </div>
 
-        {/* Past Events */}
-        {pastEvents.length > 0 && (
-          <div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">
-              Tidligere arrangementer
-            </h2>
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-              {pastEvents.map((event) => (
-                <div key={event._id} className="opacity-75">
-                  <EventCard eventId={event._id} />
+              {/* Events grouped by month */}
+              {Object.entries(eventsByMonth).map(([monthKey, { monthName, events: monthEvents }]) => (
+                <div key={monthKey} className="space-y-6">
+                  {/* Month header */}
+                  <div className="border-b border-gray-300 pb-4">
+                    <h3 className="text-2xl font-bold text-gray-900 capitalize">
+                      {monthName}
+                    </h3>
+                  </div>
+
+                  {/* Events for this month */}
+                  <div className="space-y-4">
+                    {monthEvents.map((event) => (
+                      <EventItem key={event._id} event={event} />
+                    ))}
+                  </div>
                 </div>
               ))}
             </div>
-          </div>
-        )}
+          ) : (
+            /* No upcoming events */
+            <div className="text-center py-16">
+              <div className="bg-white rounded-full p-6 w-24 h-24 mx-auto mb-6 flex items-center justify-center">
+                <Calendar className="w-12 h-12 text-gray-400" />
+              </div>
+              <h3 className="text-2xl font-bold text-gray-900 mb-4">
+                Ingen kommende arrangementer
+              </h3>
+              <p className="text-lg text-gray-600 mb-8 max-w-md mx-auto">
+                Denne arrangøren har ingen kommende arrangementer planlagt.
+                Følg dem for å få beskjed når nye arrangementer publiseres!
+              </p>
+            </div>
+          )}
+        </div>
+      </div>
 
-        {/* No Events */}
-        {(!events || events.length === 0) && (
-          <div className="text-center py-12">
-            <Calendar className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-xl font-medium text-gray-900 mb-2">
-              Ingen arrangementer ennå
-            </h3>
-            <p className="text-gray-600">
-              Denne arrangøren har ikke publisert noen arrangementer ennå.
+      {/* CTA Section */}
+      <div className="bg-gradient-to-r from-blue-600 to-purple-600">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+          <div className="text-center text-white">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">
+              Klar for å oppleve {organizer.organizerName}?
+            </h2>
+            <p className="text-xl mb-8 opacity-90 max-w-2xl mx-auto">
+              Følg denne arrangøren og få beskjed når nye arrangementer publiseres
             </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <button className="bg-white text-blue-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors">
+                Følg {organizer.organizerName}
+              </button>
+              <button className="border-2 border-white text-white px-8 py-3 rounded-lg font-semibold hover:bg-white hover:text-blue-600 transition-colors">
+                Se alle arrangementer
+              </button>
+            </div>
           </div>
-        )}
+        </div>
       </div>
     </div>
   );

@@ -4,6 +4,7 @@ import { api } from "@/convex/_generated/api";
 import { useQuery } from "convex/react";
 import { useUser } from "@clerk/nextjs";
 import TicketCard from "@/components/TicketCard";
+import OrganizationNumberForm from "@/components/OrganizationNumberForm";
 import { Ticket } from "lucide-react";
 
 export default function MyTicketsPage() {
@@ -42,6 +43,11 @@ export default function MyTicketsPage() {
               </span>
             </div>
           </div>
+        </div>
+
+        {/* Organization Number Form */}
+        <div className="mb-8">
+          <OrganizationNumberForm />
         </div>
 
         {upcomingTickets.length > 0 && (

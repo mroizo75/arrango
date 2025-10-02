@@ -218,3 +218,91 @@ export const getTicketById = query({
     };
   },
 });
+
+export const getTicketsByPaymentIntent = query({
+  args: { paymentIntentId: v.string() },
+  handler: async (ctx, { paymentIntentId }) => {
+    const tickets = await ctx.db
+      .query("tickets")
+      .filter((q) => q.eq(q.field("paymentIntentId"), paymentIntentId))
+      .collect();
+
+    return tickets;
+  },
+});
+
+export const getSellerTicketsForExport = query({
+  args: {
+    userId: v.string(),
+    startDate: v.optional(v.number()),
+    endDate: v.optional(v.number())
+  },
+  handler: async (ctx, { userId, startDate, endDate }) => {
+    // First get all events for this seller
+    const events = await ctx.db
+      .query("events")
+      .filter((q) => q.eq(q.field("userId"), userId))
+      .collect();
+
+    const eventIds = events.map(event => event._id);
+
+    // Get all tickets and filter in JavaScript
+    const allTickets = await ctx.db.query("tickets").collect();
+
+    const tickets = allTickets.filter(ticket => {
+      // Check if ticket belongs to seller's events
+      const belongsToSeller = eventIds.some(eventId => eventId === ticket.eventId);
+
+      if (!belongsToSeller) return false;
+
+      // Apply date filters
+      if (startDate && ticket.purchasedAt < startDate) return false;
+      if (endDate && ticket.purchasedAt > endDate) return false;
+
+      return true;
+    });
+
+    // Enrich tickets with additional data
+    const enrichedTickets = await Promise.all(
+      tickets.map(async (ticket) => {
+        // Get event name
+        const event = events.find(e => e._id === ticket.eventId);
+        const eventName = event?.name || "Ukjent arrangement";
+
+        // Get ticket type name
+        let ticketTypeName = null;
+        if (ticket.ticketTypeId) {
+          const ticketType = await ctx.db.get(ticket.ticketTypeId);
+          ticketTypeName = ticketType?.name || null;
+        }
+
+        // Get customer info
+        const user = await ctx.db
+          .query("users")
+          .filter((q) => q.eq(q.field("userId"), ticket.userId))
+          .first();
+
+        // Get Fiken invoice info
+        const fikenInvoice = await ctx.db
+          .query("fikenInvoices")
+          .filter((q) => q.eq(q.field("ticketId"), ticket._id))
+          .first();
+
+        return {
+          _id: ticket._id,
+          purchasedAt: ticket.purchasedAt,
+          eventName,
+          ticketTypeName,
+          customerName: user?.name || user?.email || "Ukjent kunde",
+          customerEmail: user?.email || "",
+          amount: ticket.amount,
+          status: ticket.status,
+          paymentIntentId: ticket.paymentIntentId,
+          fikenInvoiceNumber: fikenInvoice?.fikenInvoiceNumber,
+        };
+      })
+    );
+
+    return enrichedTickets;
+  },
+});

@@ -74,3 +74,29 @@ export const getUserById = query({
     return user;
   },
 });
+
+export const updateUserProfile = mutation({
+  args: {
+    userId: v.string(),
+    organizationNumber: v.optional(v.string()),
+    // Kan utvides med flere felter senere
+  },
+  handler: async (ctx, args) => {
+    const existingUser = await ctx.db
+      .query("users")
+      .filter((q) => q.eq(q.field("userId"), args.userId))
+      .first();
+
+    if (existingUser) {
+      // Oppdater eksisterende bruker
+      await ctx.db.patch(existingUser._id, {
+        organizationNumber: args.organizationNumber,
+      });
+    } else {
+      // Dette burde normalt ikke skje, men for sikkerhets skyld
+      console.warn("User not found for update:", args.userId);
+    }
+
+    return { success: true };
+  },
+});

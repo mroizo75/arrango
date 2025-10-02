@@ -62,6 +62,7 @@ export async function POST(req: Request) {
       ticketTypeId: session.metadata.ticketTypeId as Id<"ticketTypes">,
       cart: session.metadata.cart ? JSON.parse(session.metadata.cart) : undefined,
       tickets: session.metadata.tickets ? JSON.parse(session.metadata.tickets) : undefined,
+      paymentMethod: (session.metadata.paymentMethod as 'card' | 'invoice') || 'card',
     };
 
     console.log("Session metadata:", metadata);
@@ -86,6 +87,31 @@ export async function POST(req: Request) {
         },
       });
       console.log("Purchase ticket mutation completed:", result);
+
+      // Create invoices in Fiken for paid tickets
+      try {
+        // Find tickets created with this payment intent
+        const tickets = await convex.query(api.tickets.getTicketsByPaymentIntent, {
+          paymentIntentId: session.payment_intent as string,
+        });
+
+        // Create Fiken invoices for each ticket
+        for (const ticket of tickets) {
+          try {
+            const invoiceResult = await convex.action(api.fiken.createFikenInvoice, {
+              userId: metadata.userId,
+              ticketId: ticket._id,
+            });
+            console.log("Fiken invoice created:", invoiceResult);
+          } catch (invoiceError) {
+            console.error("Failed to create Fiken invoice for ticket:", ticket._id, invoiceError);
+            // Don't fail the webhook if invoice creation fails
+          }
+        }
+      } catch (fikenError) {
+        console.error("Error in Fiken invoice creation:", fikenError);
+        // Don't fail the webhook if Fiken integration fails
+      }
     } catch (error) {
       console.error("Error processing webhook:", error);
       return new Response("Error processing webhook", { status: 500 });

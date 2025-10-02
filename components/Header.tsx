@@ -1,14 +1,18 @@
+import { useState } from "react";
 import { SignInButton, SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
 import Image from "next/image";
 import Link from "next/link";
 import logo from "@/public/logo-light.png";
 import SearchBar from "./SearchBar";
+import { Menu, X } from "lucide-react";
 
 interface HeaderProps {
   isSeller?: boolean;
 }
 
 function Header({ isSeller = false }: HeaderProps) {
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
   return (
     <div className="border-b">
       <div className="flex flex-col lg:flex-row items-center gap-4 p-4">
@@ -23,30 +27,40 @@ function Header({ isSeller = false }: HeaderProps) {
             />
           </Link>
 
+          {/* Mobile Menu Button */}
           <div className="lg:hidden">
             <SignedIn>
-              <UserButton />
+              <button
+                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
+              >
+                {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+              </button>
             </SignedIn>
             <SignedOut>
-              <SignInButton mode="modal">
-                <button className="bg-gray-100 text-gray-800 px-3 py-1.5 text-sm rounded-lg hover:bg-gray-200 transition border border-gray-300">
-                  Sign In
-                </button>
-              </SignInButton>
+              <button
+                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
+              >
+                {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+              </button>
             </SignedOut>
           </div>
         </div>
 
-        {/* Search Bar - Full width on mobile */}
-        <div className="w-full lg:max-w-2xl">
-          <SearchBar />
-        </div>
+        {/* Search Bar - Only for logged in users */}
+        <SignedIn>
+          <div className="w-full lg:max-w-2xl">
+            <SearchBar />
+          </div>
+        </SignedIn>
+
 
         <div className="hidden lg:block ml-auto">
           <SignedIn>
             <div className="flex items-center gap-3">
               {isSeller && (
-                <Link href="/seller">
+                            <Link href="/dashboard">
                   <button className="bg-blue-600 text-white px-3 py-1.5 text-sm rounded-lg hover:bg-blue-700 transition">
                     Dashboard
                   </button>
@@ -63,32 +77,60 @@ function Header({ isSeller = false }: HeaderProps) {
           </SignedIn>
 
           <SignedOut>
-            <SignInButton mode="modal">
-              <button className="bg-gray-100 text-gray-800 px-3 py-1.5 text-sm rounded-lg hover:bg-gray-200 transition border border-gray-300">
-                Sign In
-              </button>
-            </SignInButton>
+            <div className="flex items-center gap-4">
+              <Link href="/arrangorer" className="text-gray-800 hover:text-blue-600 text-l">
+                Arrangører
+              </Link>
+              <SignInButton mode="modal">
+                <button className="bg-gray-100 text-gray-800 px-3 py-1.5 text-sm rounded-lg hover:bg-gray-200 transition border border-gray-300">
+                  Logg inn
+                </button>
+              </SignInButton>
+            </div>
           </SignedOut>
         </div>
 
-        {/* Mobile Action Buttons */}
-        <div className="lg:hidden w-full flex justify-center gap-3">
-          <SignedIn>
-            {isSeller && (
-              <Link href="/seller" className="flex-1">
-                <button className="w-full bg-blue-600 text-white px-3 py-1.5 text-sm rounded-lg hover:bg-blue-700 transition">
-                  Dashboard
-                </button>
-              </Link>
-            )}
+        {/* Mobile Menu */}
+        {isMobileMenuOpen && (
+          <div className="lg:hidden w-full border-t border-gray-200 pt-4 mt-4">
+            <SignedIn>
+              <div className="flex flex-col gap-3">
+                {isSeller && (
+                  <Link href="/dashboard" onClick={() => setIsMobileMenuOpen(false)}>
+                    <button className="w-full bg-blue-600 text-white px-4 py-3 text-sm rounded-lg hover:bg-blue-700 transition">
+                      Dashboard
+                    </button>
+                  </Link>
+                )}
+                <Link href="/tickets" onClick={() => setIsMobileMenuOpen(false)}>
+                  <button className="w-full bg-gray-100 text-gray-800 px-4 py-3 text-sm rounded-lg hover:bg-gray-200 transition border border-gray-300">
+                    Mine billetter
+                  </button>
+                </Link>
+              </div>
+            </SignedIn>
 
-            <Link href={`/tickets${isSeller ? '' : ''}`} className={isSeller ? "flex-1" : "w-full"}>
-              <button className="w-full bg-gray-100 text-gray-800 px-3 py-1.5 text-sm rounded-lg hover:bg-gray-200 transition border border-gray-300">
-                My Tickets
-              </button>
-            </Link>
-          </SignedIn>
-        </div>
+            <SignedOut>
+              <div className="flex flex-col gap-3">
+                <Link
+                  href="/arrangorer"
+                  className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-3 text-sm rounded-lg hover:from-blue-700 hover:to-purple-700 transition font-medium text-center"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  Bli arrangør
+                </Link>
+                <SignInButton mode="modal">
+                  <button
+                    className="w-full bg-gray-100 text-gray-800 px-4 py-3 text-sm rounded-lg hover:bg-gray-200 transition border border-gray-300"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    Logg inn
+                  </button>
+                </SignInButton>
+              </div>
+            </SignedOut>
+          </div>
+        )}
       </div>
     </div>
   );

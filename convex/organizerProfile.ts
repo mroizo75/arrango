@@ -285,3 +285,46 @@ export const getOrganizerEvents = query({
     return eventsWithAvailability;
   },
 });
+
+export const getFeaturedOrganizers = query({
+  handler: async (ctx) => {
+    // Get all users who have organizer profiles and events
+    const users = await ctx.db.query("users").collect();
+
+    const organizersWithEvents = [];
+
+    for (const user of users) {
+      // Check if user has events
+      const events = await ctx.db
+        .query("events")
+        .filter((q) => q.eq(q.field("userId"), user.userId))
+        .collect();
+
+      if (events.length > 0) {
+        // Find the most recent event with an image
+        const eventsWithImages = events
+          .filter(event => event.imageStorageId)
+          .sort((a, b) => b.eventDate - a.eventDate); // Sort by date descending
+
+        const latestEventImage = eventsWithImages.length > 0 ? eventsWithImages[0].imageStorageId : null;
+
+        organizersWithEvents.push({
+          userId: user.userId,
+          organizerName: user.organizerName || null,
+          organizerSlug: user.organizerSlug || null,
+          eventCount: events.length,
+          latestEventImage: latestEventImage,
+        });
+      }
+    }
+
+    // Shuffle the array to randomize featured organizers
+    const shuffled = [...organizersWithEvents];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+
+    return shuffled;
+  },
+});

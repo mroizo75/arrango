@@ -24,6 +24,7 @@ export type StripeCheckoutMetaData = {
     recipientEmail: string;
     id: string;
   }>;
+  paymentMethod: 'card' | 'invoice';
 };
 
 export async function createStripeCheckoutSession({
@@ -31,6 +32,7 @@ export async function createStripeCheckoutSession({
   ticketTypeId,
   cart,
   tickets,
+  paymentMethod = 'card',
 }: {
   eventId: Id<"events">;
   ticketTypeId?: Id<"ticketTypes">;
@@ -44,6 +46,7 @@ export async function createStripeCheckoutSession({
     recipientEmail: string;
     id: string;
   }>;
+  paymentMethod?: 'card' | 'invoice';
 }) {
   const { userId } = await auth();
   if (!userId) throw new Error("Not authenticated");
@@ -186,12 +189,13 @@ export async function createStripeCheckoutSession({
     ticketTypeId: ticketTypeId || null,
     cart: cart ? JSON.stringify(cart) : null,
     tickets: tickets ? JSON.stringify(tickets) : null,
+    paymentMethod,
   };
 
   // Create Stripe Checkout Session
   const session = await stripe.checkout.sessions.create(
     {
-      payment_method_types: ["card"],
+      payment_method_types: paymentMethod === 'invoice' ? ["klarna"] : ["card"],
       line_items: lineItems,
       payment_intent_data: {
         application_fee_amount: Math.round(totalAmount * 0.01),

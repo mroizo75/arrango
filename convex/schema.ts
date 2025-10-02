@@ -98,6 +98,7 @@ export default defineSchema({
     email: v.string(),
     userId: v.string(),
     stripeConnectId: v.optional(v.string()),
+    organizationNumber: v.optional(v.string()), // Norske organisasjonsnummer for faktura
     organizerLogoStorageId: v.optional(v.id("_storage")),
     organizerName: v.optional(v.string()),
     organizerWebsite: v.optional(v.string()),
@@ -136,4 +137,21 @@ export default defineSchema({
     .index("by_event", ["eventId"])
     .index("by_access_code", ["accessCode"])
     .index("by_created_by", ["createdBy"]),
+
+  fikenCredentials: defineTable({
+    userId: v.string(),
+    companySlug: v.string(),
+    accessToken: v.string(),
+    refreshToken: v.optional(v.string()),
+    tokenExpiresAt: v.optional(v.number()),
+  })
+    .index("by_user", ["userId"]),
+
+  fikenInvoices: defineTable({
+    ticketId: v.id("tickets"),
+    fikenInvoiceId: v.number(),
+    fikenInvoiceNumber: v.number(),
+    createdAt: v.number(),
+  })
+    .index("by_ticket", ["ticketId"]),
 });

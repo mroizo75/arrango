@@ -8,29 +8,31 @@ import Ticket from "@/components/Ticket";
 async function TicketSuccess({
   searchParams,
 }: {
-  searchParams: Promise<{ session_id?: string }>;
+  searchParams: Promise<{ session_id?: string; free?: string }>;
 }) {
   const { userId } = await auth();
   if (!userId) redirect("/");
 
   const params = await searchParams;
   const sessionId = params.session_id;
+  const isFree = params.free === "true";
 
   const convex = getConvexClient();
 
-  // Wait for webhook to process the payment (give it up to 5 seconds)
-  if (sessionId) {
+  // For free tickets, tickets are created immediately, so no need to wait
+  if (!isFree && sessionId) {
+    // Wait for webhook to process the payment (give it up to 5 seconds)
     const maxAttempts = 5;
     let attempts = 0;
-    
+
     while (attempts < maxAttempts) {
       const tickets = await convex.query(api.events.getUserTickets, { userId });
-      
+
       if (tickets.length > 0) {
         // Ticket found! Webhook processed it
         break;
       }
-      
+
       // Wait 1 second before next attempt
       await new Promise((resolve) => setTimeout(resolve, 1000));
       attempts++;
@@ -80,10 +82,13 @@ async function TicketSuccess({
       <div className="max-w-3xl mx-auto">
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-gray-900">
-            Billettkjøp vellykket! 🎉
+            {isFree ? "Gratis billett registrert! 🎉" : "Billettkjøp vellykket! 🎉"}
           </h1>
           <p className="mt-2 text-gray-600">
-            Billetten din er bekreftet og klar til bruk
+            {isFree
+              ? "Din gratis billett er registrert og klar til bruk"
+              : "Billetten din er bekreftet og klar til bruk"
+            }
           </p>
         </div>
 

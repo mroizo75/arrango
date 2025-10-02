@@ -61,6 +61,7 @@ type FormData = z.infer<typeof formSchema>;
 
 interface InitialEventData {
   _id: Id<"events">;
+  id?: string; // For KlarnaDeactivationDialog compatibility
   name: string;
   description: string;
   location: string;
@@ -362,6 +363,7 @@ export default function EventForm({ mode, initialData }: EventFormProps) {
               );
             }}
           />
+
 
           <FormField
             control={form.control}

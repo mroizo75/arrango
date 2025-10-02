@@ -26,7 +26,7 @@ const NAV_ITEMS = [
   { name: "Hjelp", href: "/dashboard/help", icon: HelpCircle },
 ];
 
-export function SellerDashboardSidebar() {
+export function DashboardSidebar() {
   const pathname = usePathname();
 
   return (

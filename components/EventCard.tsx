@@ -23,7 +23,12 @@ import { formatPrice, safeCurrencyCode } from "@/lib/currency";
 import Link from "next/link";
 import Image from "next/image";
 
-export default function EventCard({ eventId }: { eventId: Id<"events"> }) {
+interface EventCardProps {
+  eventId: Id<"events">;
+  showAdditionalPurchase?: boolean;
+}
+
+export default function EventCard({ eventId, showAdditionalPurchase = false }: EventCardProps) {
   const { user } = useUser();
   const router = useRouter();
   const event = useQuery(api.events.getById, { eventId });
@@ -103,7 +108,7 @@ export default function EventCard({ eventId }: { eventId: Id<"events"> }) {
           <button
             onClick={(e) => {
               e.stopPropagation();
-              router.push(`/seller/events/${eventId}/edit`);
+              router.push(`/dashboard/events/${eventId}/edit`);
             }}
             className="w-full bg-gray-100 text-gray-700 px-6 py-3 rounded-lg font-medium hover:bg-gray-200 transition-colors duration-200 shadow-sm flex items-center justify-center gap-2"
           >
@@ -140,10 +145,12 @@ export default function EventCard({ eventId }: { eventId: Id<"events"> }) {
             </button>
           </div>
 
-          {/* Always show purchase options for buying more tickets */}
-          <div className="text-center">
-            <PurchaseTicket eventId={eventId} />
-          </div>
+          {/* Show purchase options for buying more tickets only on detail pages */}
+          {showAdditionalPurchase && (
+            <div className="text-center">
+              <PurchaseTicket eventId={eventId} />
+            </div>
+          )}
         </div>
       );
     }

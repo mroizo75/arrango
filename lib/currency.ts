@@ -62,6 +62,11 @@ export const CURRENCIES: Record<CurrencyCode, CurrencyConfig> = {
  * @returns Formatted price string
  */
 export function formatPrice(amount: number, currencyCode: CurrencyCode): string {
+  // Handle free tickets
+  if (amount === 0) {
+    return "Gratis";
+  }
+
   const currency = CURRENCIES[currencyCode];
   if (!currency) {
     // Fallback to NOK if currency not found
