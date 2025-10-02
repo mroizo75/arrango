@@ -1,5 +1,45 @@
 import EventList from "@/components/EventList";
 import SearchBar from "@/components/SearchBar";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Hjem | Arrango",
+  description: "Finn og kjøp billetter til de beste arrangementene, konserter og festivaler over hele verden. Sikker billettkjøp med Stripe. Støtter flere valutaer. Gratis for arrangører!",
+  keywords: [
+    "billetter",
+    "arrangementer",
+    "konserter",
+    "festivaler",
+    "teater",
+    "kjøp billetter online",
+    "live events",
+    "kulturarrangementer",
+    "billettservice",
+    "event tickets",
+    "internasjonale events",
+    "worldwide tickets"
+  ],
+  openGraph: {
+    title: "Arrango - Finn arrangementer og kjøp billetter verden over",
+    description: "Oppdag de beste arrangementene over hele verden. Fra konserter til festivaler - kjøp billetter trygt og enkelt. Støtter flere valutaer.",
+    type: "website",
+    url: "https://arrango.no",
+    images: [
+      {
+        url: "/images/logo.png",
+        width: 1200,
+        height: 630,
+        alt: "Arrango - Din internasjonale billettplattform",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Arrango - Finn arrangementer og kjøp billetter verden over",
+    description: "Oppdag de beste arrangementene over hele verden. Fra konserter til festivaler - kjøp billetter trygt og enkelt.",
+    images: ["/images/logo.png"],
+  },
+};
 
 export default function Home() {
   return (

@@ -166,7 +166,7 @@ export default function EventList({ limit, showFeaturedOrganizers = false, showC
             Klar for å arrangere ditt eget event?
           </h3>
           <p className="text-lg mb-6 opacity-90">
-            Første arrangement er helt gratis. Kom i gang på få minutter.
+            Det er helt gratis å bli arrangør. Kom i gang på få minutter.
           </p>
           <Link href="/arrangorer">
             <Button size="lg" className="bg-white text-blue-600 hover:bg-gray-100 px-8 py-3">
