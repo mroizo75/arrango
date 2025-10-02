@@ -96,12 +96,12 @@ export default function ArrangorerPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
             <div>
-              <div className="text-3xl font-bold text-blue-600 mb-2">500+</div>
-              <div className="text-gray-600">Arrangementer opprettet</div>
+              <div className="text-3xl font-bold text-blue-600 mb-2">Gratis</div>
+              <div className="text-gray-600">Å komme i gang</div>
             </div>
             <div>
-              <div className="text-3xl font-bold text-green-600 mb-2">25.000+</div>
-              <div className="text-gray-600">Billetter solgt</div>
+              <div className="text-3xl font-bold text-green-600 mb-2">Enkelt</div>
+              <div className="text-gray-600">Å bruke</div>
             </div>
             <div>
               <div className="text-3xl font-bold text-purple-600 mb-2">98%</div>
@@ -251,7 +251,7 @@ export default function ArrangorerPage() {
               Hva arrangørene våre sier
             </h2>
             <p className="text-lg text-gray-600">
-              Over 500 arrangører stoler på Arrango
+              Bli en av de første som bruker Arrango
             </p>
           </div>
 
@@ -366,11 +366,13 @@ export default function ArrangorerPage() {
                     <span>24/7 norsk support</span>
                   </div>
                 </div>
-                <Link href="/seller/new-event" className="w-full">
-                  <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white mt-6">
-                    Start gratis nå
-                  </Button>
-                </Link>
+                <div className="w-full">
+                  <SignInButton mode="modal">
+                    <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white mt-6">
+                      Start gratis nå
+                    </Button>
+                  </SignInButton>
+                </div>
               </CardContent>
             </Card>
 
@@ -466,11 +468,11 @@ export default function ArrangorerPage() {
             Ingen risiko, ingen bindingstid.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href="/seller/new-event">
+            <SignInButton mode="modal">
               <Button size="lg" className="bg-white text-blue-600 hover:bg-blue-100 hover:text-blue-600 px-8 py-3">
                 Start gratis nå →
               </Button>
-            </Link>
+            </SignInButton>
             <Link href="mailto:support@arrango.no">
               <Button variant="outline" size="lg" className="border-white text-blue-600 hover:bg-blue-600 hover:text-white px-8 py-3">
                 Kontakt oss
