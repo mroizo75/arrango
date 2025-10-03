@@ -134,10 +134,12 @@ export default function RootLayout({
   return (
     <html lang="nb">
       <head>
-        {/* Essential preconnects */}
+        {/* Essential preconnects for arrango.no domain */}
         <link rel="preconnect" href="https://ceaseless-tapir-769.convex.cloud" crossOrigin="anonymous" />
         <link rel="preconnect" href="https://js.stripe.com" crossOrigin="anonymous" />
         <link rel="preconnect" href="https://clerk.com" crossOrigin="anonymous" />
+        {/* Also add www version in case Lighthouse tests that */}
+        <link rel="preconnect" href="https://www.arrango.no" />
 
         {/* Prevent layout shift for web fonts */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
