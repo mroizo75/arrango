@@ -11,12 +11,12 @@ import { CookieConsentProvider } from "@/hooks/useCookieConsent";
 import ClientWrapper from "@/components/ClientWrapper";
 
 const geistSans = localFont({
-  src: "/fonts/GeistVF.woff",
+  src: "./fonts/GeistVF.woff",
   variable: "--font-geist-sans",
   weight: "100 900",
 });
 const geistMono = localFont({
-  src: "/fonts/GeistMonoVF.woff",
+  src: "./fonts/GeistMonoVF.woff",
   variable: "--font-geist-mono",
   weight: "100 900",
 });
@@ -145,27 +145,6 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
 
-        {/* Preload critical resources */}
-        <link
-          rel="preload"
-          href="/fonts/GeistVF.woff"
-          as="font"
-          type="font/woff"
-          crossOrigin="anonymous"
-        />
-
-        {/* Critical CSS for font loading */}
-        <style dangerouslySetInnerHTML={{
-          __html: `
-            @font-face {
-              font-family: 'Geist';
-              font-style: normal;
-              font-weight: 100 900;
-              font-display: swap;
-              src: url('/fonts/GeistVF.woff') format('woff');
-            }
-          `
-        }} />
       </head>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <CookieConsentProvider>
