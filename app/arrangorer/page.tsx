@@ -6,28 +6,66 @@ import { Badge } from "@/components/ui/badge";
 import { CheckCircle, Ticket, CreditCard, TrendingUp, Users, Zap, Star, Award, Shield } from "lucide-react";
 import Link from "next/link";
 import { SignInButton, SignUpButton } from "@clerk/nextjs";
+import { useEffect, useRef, useState } from "react";
 
 export default function ArrangorerPage() {
+  const [isVisible, setIsVisible] = useState(false);
+  const heroRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(false); // Reset animation
+          setTimeout(() => setIsVisible(true), 100); // Trigger animation
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    if (heroRef.current) {
+      observer.observe(heroRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, []);
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
 
       {/* Hero Section */}
-      <section className="relative overflow-hidden py-20">
+      <section ref={heroRef} className="relative overflow-hidden py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div>
-              <Badge className="mb-4 bg-green-100 text-green-800 hover:bg-green-100">
+              <Badge className={`mb-4 bg-green-100 text-green-800 hover:bg-green-100 transition-all duration-700 ${
+                isVisible
+                  ? 'opacity-100 translate-y-0'
+                  : 'opacity-0 translate-y-4'
+              }`}>
                 🎉 Første arrangement gratis!
               </Badge>
-              <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
+              <h1 className={`text-4xl md:text-5xl font-bold text-gray-900 mb-6 transition-all duration-700 delay-200 ${
+                isVisible
+                  ? 'opacity-100 translate-y-0'
+                  : 'opacity-0 translate-y-4'
+              }`}>
                 Superenkelt billettsalg for
                 <span className="text-blue-600 block">små og store arrangører</span>
               </h1>
-              <p className="text-xl text-gray-600 mb-8">
+              <p className={`text-xl text-gray-600 mb-8 transition-all duration-700 delay-400 ${
+                isVisible
+                  ? 'opacity-100 translate-y-0'
+                  : 'opacity-0 translate-y-4'
+              }`}>
                 Med Arrango får du alt du trenger for å selge billetter på nett.
                 Registrer deg gratis og kom i gang med ditt første arrangement i dag.
               </p>
-              <div className="flex flex-col sm:flex-row gap-4">
+              <div className={`flex flex-col sm:flex-row gap-4 transition-all duration-700 delay-600 ${
+                isVisible
+                  ? 'opacity-100 translate-y-0'
+                  : 'opacity-0 translate-y-4'
+              }`}>
 
                   <SignUpButton mode="modal">
                     <Button size="lg" className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 text-lg">
@@ -43,7 +81,11 @@ export default function ArrangorerPage() {
               </div>
 
               {/* Action buttons for existing users */}
-              <div className="flex flex-col sm:flex-row gap-3 mt-8 pt-6 border-t border-gray-200">
+              <div className={`flex flex-col sm:flex-row gap-3 mt-8 pt-6 border-t border-gray-200 transition-all duration-700 delay-800 ${
+                isVisible
+                  ? 'opacity-100 translate-y-0'
+                  : 'opacity-0 translate-y-4'
+              }`}>
                 <p className="text-gray-600 text-sm mr-4 flex items-center">
                   Har du allerede konto?
                 </p>
@@ -54,10 +96,18 @@ export default function ArrangorerPage() {
                 </SignInButton>
               </div>
             </div>
-            <div className="relative">
+            <div className={`relative transition-all duration-700 delay-1000 ${
+              isVisible
+                ? 'opacity-100 translate-x-0'
+                : 'opacity-0 translate-x-8'
+            }`}>
               <div className="bg-gradient-to-br from-blue-100 to-purple-100 rounded-2xl p-8 shadow-xl">
                 <div className="space-y-6">
-                  <div className="flex items-center gap-4">
+                  <div className={`flex items-center gap-4 transition-all duration-700 delay-1200 ${
+                    isVisible
+                      ? 'opacity-100 translate-x-0'
+                      : 'opacity-0 -translate-x-4'
+                  }`}>
                     <div className="w-12 h-12 bg-blue-600 rounded-lg flex items-center justify-center">
                       <Ticket className="w-6 h-6 text-white" />
                     </div>
@@ -66,7 +116,11 @@ export default function ArrangorerPage() {
                       <p className="text-sm text-gray-600">250 billetter solgt • 45.000 kr</p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-4">
+                  <div className={`flex items-center gap-4 transition-all duration-700 delay-1400 ${
+                    isVisible
+                      ? 'opacity-100 translate-x-0'
+                      : 'opacity-0 -translate-x-4'
+                  }`}>
                     <div className="w-12 h-12 bg-green-600 rounded-lg flex items-center justify-center">
                       <TrendingUp className="w-6 h-6 text-white" />
                     </div>
@@ -75,7 +129,11 @@ export default function ArrangorerPage() {
                       <p className="text-sm text-gray-600">Følg med på salg og inntekter</p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-4">
+                  <div className={`flex items-center gap-4 transition-all duration-700 delay-1600 ${
+                    isVisible
+                      ? 'opacity-100 translate-x-0'
+                      : 'opacity-0 -translate-x-4'
+                  }`}>
                     <div className="w-12 h-12 bg-purple-600 rounded-lg flex items-center justify-center">
                       <Zap className="w-6 h-6 text-white" />
                     </div>
@@ -92,24 +150,35 @@ export default function ArrangorerPage() {
       </section>
 
       {/* Stats Section */}
-      <section className="py-16 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
-            <div>
-              <div className="text-3xl font-bold text-blue-600 mb-2">Gratis</div>
-              <div className="text-gray-600">Å komme i gang</div>
+      <section
+        className="py-16 relative overflow-hidden"
+        style={{
+          backgroundImage: 'url("/arrango_overlay.png")',
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat',
+        }}
+      >
+        {/* Semi-transparent white overlay for text readability */}
+        <div className="absolute inset-0 bg-white/0" />
+
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+            <div className="bg-white/90 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-white/20 hover:shadow-xl hover:scale-105 transition-all duration-300 text-center">
+              <div className="text-4xl font-bold text-blue-600 mb-3">Gratis</div>
+              <div className="text-gray-700 font-medium">Å komme i gang</div>
             </div>
-            <div>
-              <div className="text-3xl font-bold text-green-600 mb-2">Enkelt</div>
-              <div className="text-gray-600">Å bruke</div>
+            <div className="bg-white/90 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-white/20 hover:shadow-xl hover:scale-105 transition-all duration-300 text-center">
+              <div className="text-4xl font-bold text-green-600 mb-3">Enkelt</div>
+              <div className="text-gray-700 font-medium">Å bruke</div>
             </div>
-            <div>
-              <div className="text-3xl font-bold text-purple-600 mb-2">98%</div>
-              <div className="text-gray-600">Kundetilfredshet</div>
+            <div className="bg-white/90 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-white/20 hover:shadow-xl hover:scale-105 transition-all duration-300 text-center">
+              <div className="text-4xl font-bold text-purple-600 mb-3">98%</div>
+              <div className="text-gray-700 font-medium">Kundetilfredshet</div>
             </div>
-            <div>
-              <div className="text-3xl font-bold text-orange-600 mb-2">24/7</div>
-              <div className="text-gray-600">Support</div>
+            <div className="bg-white/90 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-white/20 hover:shadow-xl hover:scale-105 transition-all duration-300 text-center">
+              <div className="text-4xl font-bold text-orange-600 mb-3">24/7</div>
+              <div className="text-gray-700 font-medium">Support</div>
             </div>
           </div>
         </div>
@@ -299,7 +368,7 @@ export default function ArrangorerPage() {
                     <span className="text-sm font-semibold text-green-600">ON</span>
                   </div>
                   <div>
-                    <div className="font-semibold text-gray-900">Ole Nordmann</div>
+                    <div className="font-semibold text-gray-900">Kai Nordli</div>
                     <div className="text-sm text-gray-600">Idrettsklubb leder</div>
                   </div>
                 </div>
