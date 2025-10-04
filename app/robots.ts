@@ -12,7 +12,7 @@ export default function robots(): MetadataRoute.Robots {
         '/api/',
       ],
     },
-    sitemap: 'https://arrango.no/sitemap.xml',
-    host: 'https://arrango.no',
+    sitemap: 'https://www.arrango.no/sitemap.xml',
+    host: 'https://www.arrango.no',
   }
 }

@@ -114,6 +114,9 @@ function Header({ isSeller = false }: HeaderProps) {
                     Mine billetter
                   </button>
                 </Link>
+                <div className="pt-2 border-t border-gray-200 mt-2">
+                  <LazyUserButton />
+                </div>
               </div>
             </SignedIn>
 
