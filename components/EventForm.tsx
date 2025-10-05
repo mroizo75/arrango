@@ -105,6 +105,9 @@ export default function EventForm({ mode, initialData }: EventFormProps) {
   const [isPending, startTransition] = useTransition();
   const { toast } = useToast();
   const currentImageUrl = useStorageUrl(initialData?.imageStorageId);
+  
+  // Prevent double submission
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Multi-step state
   const [currentStep, setCurrentStep] = useState(1);
@@ -154,6 +157,12 @@ export default function EventForm({ mode, initialData }: EventFormProps) {
 
   async function onSubmit(values: FormData) {
     if (!user?.id) return;
+    
+    // Prevent double submission
+    if (isSubmitting || isPending) {
+      console.log("Already submitting, ignoring duplicate click");
+      return;
+    }
 
     // Validate Stripe requirement for paid events
     if (values.price > 0 && !hasStripe) {
@@ -164,6 +173,8 @@ export default function EventForm({ mode, initialData }: EventFormProps) {
       });
       return;
     }
+
+    setIsSubmitting(true);
 
     startTransition(() => {
       (async () => {
@@ -232,6 +243,8 @@ export default function EventForm({ mode, initialData }: EventFormProps) {
             title: "Noe gikk galt",
             description: "Kunne ikke lagre arrangementet. Prøv igjen.",
           });
+        } finally {
+          setIsSubmitting(false);
         }
       })();
     });
@@ -697,6 +710,7 @@ export default function EventForm({ mode, initialData }: EventFormProps) {
               <Button 
                 type="button" 
                 onClick={nextStep}
+                disabled={isSubmitting || isPending}
                 className="flex-1"
                 size="lg"
               >
@@ -707,18 +721,18 @@ export default function EventForm({ mode, initialData }: EventFormProps) {
               <>
                 <Button 
                   type="submit" 
-                  disabled={isPending} 
+                  disabled={isSubmitting || isPending} 
                   className="flex-1" 
                   size="lg"
                 >
-                  {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  {(isSubmitting || isPending) && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                   {mode === "create" ? "Opprett arrangement" : "Lagre endringer"}
                 </Button>
                 {!imagePreview && !currentImageUrl && (
                   <Button 
                     type="submit" 
                     variant="outline"
-                    disabled={isPending} 
+                    disabled={isSubmitting || isPending} 
                     size="lg"
                   >
                     Hopp over bilde
@@ -730,7 +744,8 @@ export default function EventForm({ mode, initialData }: EventFormProps) {
             <Button 
               type="button" 
               variant="outline" 
-              onClick={() => router.back()} 
+              onClick={() => router.back()}
+              disabled={isSubmitting || isPending}
               size="lg"
             >
               Avbryt

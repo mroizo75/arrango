@@ -78,10 +78,10 @@ export default function EventPageClient({ eventId }: Props) {
       />
 
       <div className="min-h-screen bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-12">
           <div className="bg-white rounded-xl shadow-sm overflow-hidden">
             {imageUrl && (
-              <div className="aspect-[21/9] relative w-full">
+              <div className="aspect-video sm:aspect-[3/1] relative w-full max-h-[300px] sm:max-h-[400px]">
                 <Image
                   src={imageUrl}
                   alt={event.name}
@@ -92,15 +92,15 @@ export default function EventPageClient({ eventId }: Props) {
               </div>
             )}
 
-            <div className="p-8">
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+            <div className="p-4 sm:p-6 lg:p-8">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-12">
                 {/* Left Column - Event Details */}
-                <div className="space-y-8">
+                <div className="space-y-6 lg:space-y-8">
                   <div>
-                    <h1 className="text-4xl font-bold text-gray-900 mb-4">
+                    <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-3">
                       {event.name}
                     </h1>
-                    <p className="text-lg text-gray-600 mb-4">{event.description}</p>
+                    <p className="text-base sm:text-lg text-gray-600 mb-3">{event.description}</p>
 
                     {organizer?.organizerSlug && (
                       <div className="flex items-center gap-2 text-sm text-gray-600">
@@ -115,44 +115,44 @@ export default function EventPageClient({ eventId }: Props) {
                     )}
                   </div>
 
-                  <div className="grid grid-cols-2 gap-6">
-                    <div className="bg-gray-50 p-4 rounded-lg border border-gray-100">
+                  <div className="grid grid-cols-2 gap-3 sm:gap-6">
+                    <div className="bg-gray-50 p-3 sm:p-4 rounded-lg border border-gray-100">
                       <div className="flex items-center text-gray-600 mb-1">
-                        <CalendarDays className="w-5 h-5 mr-2 text-blue-600" />
-                        <span className="text-sm font-medium">Dato</span>
+                        <CalendarDays className="w-4 h-4 sm:w-5 sm:h-5 mr-1 sm:mr-2 text-blue-600" />
+                        <span className="text-xs sm:text-sm font-medium">Dato</span>
                       </div>
-                      <p className="text-gray-900">
+                      <p className="text-sm sm:text-base text-gray-900 leading-tight">
                         {new Date(event.eventDate).toLocaleDateString("nb-NO", {
-                          weekday: "long",
+                          weekday: "short",
                           year: "numeric",
-                          month: "long",
+                          month: "short",
                           day: "numeric",
                         })}
                       </p>
                     </div>
 
-                    <div className="bg-gray-50 p-4 rounded-lg border border-gray-100">
+                    <div className="bg-gray-50 p-3 sm:p-4 rounded-lg border border-gray-100">
                       <div className="flex items-center text-gray-600 mb-1">
-                        <MapPin className="w-5 h-5 mr-2 text-blue-600" />
-                        <span className="text-sm font-medium">Sted</span>
+                        <MapPin className="w-4 h-4 sm:w-5 sm:h-5 mr-1 sm:mr-2 text-blue-600" />
+                        <span className="text-xs sm:text-sm font-medium">Sted</span>
                       </div>
-                      <p className="text-gray-900">{event.location}</p>
+                      <p className="text-sm sm:text-base text-gray-900 leading-tight">{event.location}</p>
                     </div>
 
-                    <div className="bg-gray-50 p-4 rounded-lg border border-gray-100">
+                    <div className="bg-gray-50 p-3 sm:p-4 rounded-lg border border-gray-100">
                       <div className="flex items-center text-gray-600 mb-1">
-                        <Ticket className="w-5 h-5 mr-2 text-blue-600" />
-                        <span className="text-sm font-medium">Pris per billett</span>
+                        <Ticket className="w-4 h-4 sm:w-5 sm:h-5 mr-1 sm:mr-2 text-blue-600" />
+                        <span className="text-xs sm:text-sm font-medium">Pris per billett</span>
                       </div>
-                      <p className="text-gray-900">{formatPrice(event.price, safeCurrencyCode(event.currency))}</p>
+                      <p className="text-sm sm:text-base text-gray-900 leading-tight">{formatPrice(event.price, safeCurrencyCode(event.currency))}</p>
                     </div>
 
-                    <div className="bg-gray-50 p-4 rounded-lg border border-gray-100">
+                    <div className="bg-gray-50 p-3 sm:p-4 rounded-lg border border-gray-100">
                       <div className="flex items-center text-gray-600 mb-1">
-                        <Users className="w-5 h-5 mr-2 text-blue-600" />
-                        <span className="text-sm font-medium">Tilgjengelighet</span>
+                        <Users className="w-4 h-4 sm:w-5 sm:h-5 mr-1 sm:mr-2 text-blue-600" />
+                        <span className="text-xs sm:text-sm font-medium">Tilgjengelighet</span>
                       </div>
-                      <p className="text-gray-900">
+                      <p className="text-sm sm:text-base text-gray-900 leading-tight">
                         {availability.totalTickets - availability.purchasedCount}{" "}
                         / {availability.totalTickets} ledige
                       </p>
