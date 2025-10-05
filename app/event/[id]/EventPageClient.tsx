@@ -9,6 +9,7 @@ import Spinner from "@/components/Spinner";
 import JoinQueue from "@/components/JoinQueue";
 import { SignInButton, useUser } from "@clerk/nextjs";
 import { useStorageUrl } from "@/lib/hooks";
+import { useClerkMode } from "@/hooks/useClerkMode";
 import { formatPrice, safeCurrencyCode } from "@/lib/currency";
 import Link from "next/link";
 import Image from "next/image";
@@ -20,6 +21,7 @@ type Props = {
 
 export default function EventPageClient({ eventId }: Props) {
   const { user } = useUser();
+  const clerkMode = useClerkMode();
   const event = useQuery(api.events.getById, {
     eventId,
   });
@@ -228,7 +230,7 @@ export default function EventPageClient({ eventId }: Props) {
                         userId={user.id}
                       />
                     ) : (
-                      <SignInButton mode="modal">
+                      <SignInButton mode={clerkMode}>
                         <Button className="w-full bg-gradient-to-r from-blue-600 to-blue-800 hover:from-blue-700 hover:to-blue-900 text-white font-medium py-2 px-4 rounded-lg transition-all duration-200 shadow-md hover:shadow-lg">
                           Logg inn for å kjøpe billetter
                         </Button>

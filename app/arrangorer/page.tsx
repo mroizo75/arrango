@@ -7,10 +7,12 @@ import { CheckCircle, Ticket, CreditCard, TrendingUp, Users, Zap, Star, Award, S
 import Link from "next/link";
 import { SignInButton, SignUpButton } from "@clerk/nextjs";
 import { useEffect, useRef, useState } from "react";
+import { useClerkMode } from "@/hooks/useClerkMode";
 
 export default function ArrangorerPage() {
   const [isVisible, setIsVisible] = useState(false);
   const heroRef = useRef<HTMLElement>(null);
+  const clerkMode = useClerkMode();
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -67,7 +69,7 @@ export default function ArrangorerPage() {
                   : 'opacity-0 translate-y-4'
               }`}>
 
-                  <SignUpButton mode="modal">
+                  <SignUpButton mode={clerkMode}>
                     <Button size="lg" className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 text-lg">
                       Kom i gang gratis →
                     </Button>
@@ -89,7 +91,7 @@ export default function ArrangorerPage() {
                 <p className="text-gray-600 text-sm mr-4 flex items-center">
                   Har du allerede konto?
                 </p>
-                <SignInButton mode="modal" >
+                <SignInButton mode={clerkMode} >
                   <Button variant="outline" size="sm">
                     Logg inn her
                   </Button>
@@ -442,7 +444,7 @@ export default function ArrangorerPage() {
                   </div>
                 </div>
                 <div className="w-full">
-                  <SignUpButton mode="modal">
+                  <SignUpButton mode={clerkMode}>
                     <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white mt-6">
                       Start gratis nå
                     </Button>
@@ -543,7 +545,7 @@ export default function ArrangorerPage() {
             Ingen risiko, ingen bindingstid.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <SignUpButton mode="modal">
+            <SignUpButton mode={clerkMode}>
               <Button size="lg" className="bg-white text-blue-600 hover:bg-blue-100 hover:text-blue-600 px-8 py-3">
                 Start gratis nå →
               </Button>

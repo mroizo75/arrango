@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { SignInButton, SignedIn, SignedOut } from "@clerk/nextjs";
 import dynamic from "next/dynamic";
+import { useClerkMode } from "@/hooks/useClerkMode";
 
 // Lazy load UserButton for better initial load
 const LazyUserButton = dynamic(
@@ -21,6 +22,7 @@ interface HeaderProps {
 
 function Header({ isSeller = false }: HeaderProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const clerkMode = useClerkMode();
 
   return (
     <div className="border-b">
@@ -88,7 +90,7 @@ function Header({ isSeller = false }: HeaderProps) {
               <Link href="/arrangorer" className="text-gray-800 hover:text-blue-600 text-lg">
                 Arrangører
               </Link>
-              <SignInButton mode="modal">
+              <SignInButton mode={clerkMode}>
                 <button className="bg-gray-100 text-gray-800 px-3 py-1.5 text-sm rounded-lg hover:bg-gray-200 transition border border-gray-300">
                   Logg inn
                 </button>
@@ -129,7 +131,7 @@ function Header({ isSeller = false }: HeaderProps) {
                 >
                   Bli arrangør
                 </Link>
-                <SignInButton mode="modal">
+                <SignInButton mode={clerkMode}>
                   <button
                     className="w-full bg-gray-100 text-gray-800 px-4 py-3 text-sm rounded-lg hover:bg-gray-200 transition border border-gray-300"
                     onClick={() => setIsMobileMenuOpen(false)}
