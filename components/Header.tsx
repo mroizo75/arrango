@@ -1,20 +1,19 @@
-import React, { useState } from "react";
-import { SignInButton, SignedIn, SignedOut } from "@clerk/nextjs";
-import dynamic from "next/dynamic";
-import { useClerkMode } from "@/hooks/useClerkMode";
+"use client";
 
-// Lazy load UserButton for better initial load
-const LazyUserButton = dynamic(
-  () => import("@clerk/nextjs").then(mod => ({ default: mod.UserButton })),
-  {
-    loading: () => <div className="w-8 h-8 bg-gray-200 rounded-full animate-pulse" />,
-    ssr: false
-  }
-);
+import React, { useState } from "react";
+import { useSession, signOut } from "next-auth/react";
 import Image from "next/image";
 import Link from "next/link";
 import logo from "@/public/logo-light.png";
-import { Menu, X } from "lucide-react";
+import { Menu, X, User, LogOut } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Button } from "@/components/ui/button";
 
 interface HeaderProps {
   isSeller?: boolean;
@@ -22,7 +21,13 @@ interface HeaderProps {
 
 function Header({ isSeller = false }: HeaderProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const clerkMode = useClerkMode();
+  const { data: session, status } = useSession();
+  const isLoading = status === "loading";
+  const isAuthenticated = !!session;
+
+  const handleSignOut = async () => {
+    await signOut({ callbackUrl: "/" });
+  };
 
   return (
     <div className="border-b">
@@ -40,107 +45,160 @@ function Header({ isSeller = false }: HeaderProps) {
 
           {/* Mobile Menu Button */}
           <div className="lg:hidden">
-            <SignedIn>
-              <button
-                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
-                aria-label={isMobileMenuOpen ? "Lukk meny" : "Åpne meny"}
-                aria-expanded={isMobileMenuOpen}
-              >
-                {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-              </button>
-            </SignedIn>
-            <SignedOut>
-              <button
-                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
-                aria-label={isMobileMenuOpen ? "Lukk meny" : "Åpne meny"}
-                aria-expanded={isMobileMenuOpen}
-              >
-                {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-              </button>
-            </SignedOut>
+            <button
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
+              aria-label={isMobileMenuOpen ? "Lukk meny" : "Åpne meny"}
+              aria-expanded={isMobileMenuOpen}
+            >
+              {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+            </button>
           </div>
         </div>
 
-
-
+        {/* Desktop Menu */}
         <div className="hidden lg:block ml-auto">
-          <SignedIn>
+          {isAuthenticated ? (
             <div className="flex items-center gap-3">
               {isSeller && (
                 <Link href="/dashboard">
-                  <button className="bg-blue-600 text-white px-3 py-1.5 text-sm rounded-lg hover:bg-blue-700 transition">
+                  <Button variant="default" size="sm" className="bg-blue-600 hover:bg-blue-700">
                     Dashboard
-                  </button>
+                  </Button>
                 </Link>
               )}
 
               <Link href="/tickets">
-                <button className="bg-gray-100 text-gray-800 px-3 py-1.5 text-sm rounded-lg hover:bg-gray-200 transition border border-gray-300">
+                <Button variant="outline" size="sm">
                   Mine billetter
-                </button>
+                </Button>
               </Link>
-              <LazyUserButton />
-            </div>
-          </SignedIn>
 
-          <SignedOut>
+              {/* User Menu */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="icon" className="rounded-full">
+                    <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white font-semibold">
+                      {session.user.name?.charAt(0).toUpperCase() || "U"}
+                    </div>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56">
+                  <div className="px-2 py-1.5">
+                    <p className="text-sm font-medium">{session.user.name}</p>
+                    <p className="text-xs text-gray-500">{session.user.email}</p>
+                  </div>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem asChild>
+                    <Link href="/dashboard/settings" className="cursor-pointer">
+                      <User className="w-4 h-4 mr-2" />
+                      Innstillinger
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={handleSignOut} className="cursor-pointer text-red-600">
+                    <LogOut className="w-4 h-4 mr-2" />
+                    Logg ut
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          ) : (
             <div className="flex items-center gap-4">
               <Link href="/arrangorer" className="text-gray-800 hover:text-blue-600 text-lg">
                 Arrangører
               </Link>
-              <SignInButton mode={clerkMode}>
-                <button className="bg-gray-100 text-gray-800 px-3 py-1.5 text-sm rounded-lg hover:bg-gray-200 transition border border-gray-300">
+              <Link href="/sign-in">
+                <Button variant="outline" size="sm">
                   Logg inn
-                </button>
-              </SignInButton>
+                </Button>
+              </Link>
+              <Link href="/become-organizer">
+                <Button size="sm" className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700">
+                  Bli arrangør
+                </Button>
+              </Link>
             </div>
-          </SignedOut>
+          )}
+
+          {isLoading && (
+            <div className="w-8 h-8 bg-gray-200 rounded-full animate-pulse" />
+          )}
         </div>
 
         {/* Mobile Menu */}
         {isMobileMenuOpen && (
           <div className="lg:hidden w-full border-t border-gray-200 pt-4 mt-4">
-            <SignedIn>
+            {isAuthenticated ? (
               <div className="flex flex-col gap-3">
+                <div className="px-4 py-2 bg-gray-50 rounded-lg">
+                  <p className="text-sm font-medium">{session.user.name}</p>
+                  <p className="text-xs text-gray-500">{session.user.email}</p>
+                </div>
+                
                 {isSeller && (
                   <Link href="/dashboard" onClick={() => setIsMobileMenuOpen(false)}>
-                    <button className="w-full bg-blue-600 text-white px-4 py-3 text-sm rounded-lg hover:bg-blue-700 transition">
+                    <Button className="w-full bg-blue-600 hover:bg-blue-700">
                       Dashboard
-                    </button>
+                    </Button>
                   </Link>
                 )}
+                
                 <Link href="/tickets" onClick={() => setIsMobileMenuOpen(false)}>
-                  <button className="w-full bg-gray-100 text-gray-800 px-4 py-3 text-sm rounded-lg hover:bg-gray-200 transition border border-gray-300">
+                  <Button variant="outline" className="w-full">
                     Mine billetter
-                  </button>
+                  </Button>
                 </Link>
-                <div className="pt-2 border-t border-gray-200 mt-2">
-                  <LazyUserButton />
-                </div>
+                
+                <Link href="/dashboard/settings" onClick={() => setIsMobileMenuOpen(false)}>
+                  <Button variant="outline" className="w-full">
+                    <User className="w-4 h-4 mr-2" />
+                    Innstillinger
+                  </Button>
+                </Link>
+                
+                <Button
+                  variant="outline"
+                  className="w-full text-red-600 border-red-200 hover:bg-red-50"
+                  onClick={() => {
+                    setIsMobileMenuOpen(false);
+                    handleSignOut();
+                  }}
+                >
+                  <LogOut className="w-4 h-4 mr-2" />
+                  Logg ut
+                </Button>
               </div>
-            </SignedIn>
-
-            <SignedOut>
+            ) : (
               <div className="flex flex-col gap-3">
                 <Link
                   href="/arrangorer"
-                  className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-3 text-sm rounded-lg hover:from-blue-700 hover:to-purple-700 transition font-medium text-center"
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
-                  Bli arrangør
+                  <Button variant="outline" className="w-full">
+                    Arrangører
+                  </Button>
                 </Link>
-                <SignInButton mode={clerkMode}>
-                  <button
-                    className="w-full bg-gray-100 text-gray-800 px-4 py-3 text-sm rounded-lg hover:bg-gray-200 transition border border-gray-300"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                  >
+                
+                <Link
+                  href="/become-organizer"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  <Button className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700">
+                    Bli arrangør
+                  </Button>
+                </Link>
+                
+                <Link
+                  href="/sign-in"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  <Button variant="outline" className="w-full">
                     Logg inn
-                  </button>
-                </SignInButton>
+                  </Button>
+                </Link>
               </div>
-            </SignedOut>
+            )}
           </div>
         )}
       </div>

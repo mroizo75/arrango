@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { useUser } from "@clerk/nextjs";
+import { useSession } from "next-auth/react";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Button } from "@/components/ui/button";
@@ -13,7 +13,8 @@ import { useToast } from "@/hooks/use-toast";
 import { CheckCircle, AlertCircle, Loader2 } from "lucide-react";
 
 export default function FikenSettings() {
-  const { user } = useUser();
+  const { data: session } = useSession();
+  const user = session?.user;
   const { toast } = useToast();
 
   const [companySlug, setCompanySlug] = useState("");

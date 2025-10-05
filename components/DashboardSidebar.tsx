@@ -14,7 +14,9 @@ import {
   HelpCircle,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { SignedIn, UserButton } from "@clerk/nextjs";
+import { signOut } from "next-auth/react";
+import { LogOut } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 const NAV_ITEMS = [
   { name: "Oversikt", href: "/dashboard", icon: LayoutDashboard },
@@ -78,18 +80,14 @@ export function DashboardSidebar() {
         <div className="rounded-lg bg-muted p-3 text-sm text-muted-foreground">
           Beløp vises i kroner (NOK).
         </div>
-        <SignedIn>
-          <div className="flex items-center justify-between rounded-lg border px-3 py-2">
-            <div>
-              <p className="text-sm font-medium text-foreground">Min konto</p>
-              <p className="text-xs text-muted-foreground">Administrer profil</p>
-            </div>
-            <UserButton
-              appearance={{ elements: { userButtonBox: { padding: 0 } } }}
-              afterSignOutUrl="/"
-            />
-          </div>
-        </SignedIn>
+        <Button 
+          variant="outline" 
+          className="w-full justify-start text-red-600 hover:text-red-700 hover:bg-red-50"
+          onClick={() => signOut({ callbackUrl: "/" })}
+        >
+          <LogOut className="mr-2 h-4 w-4" />
+          Logg ut
+        </Button>
       </div>
     </aside>
   );

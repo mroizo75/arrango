@@ -97,7 +97,9 @@ export default defineSchema({
     name: v.string(),
     email: v.string(),
     userId: v.string(),
+    hashedPassword: v.optional(v.string()), // For NextAuth credentials
     stripeConnectId: v.optional(v.string()),
+    isOrganizer: v.optional(v.boolean()), // True if user is an organizer
     organizationNumber: v.optional(v.string()), // Norske organisasjonsnummer for faktura
     organizerLogoStorageId: v.optional(v.id("_storage")),
     organizerName: v.optional(v.string()),

@@ -3,7 +3,7 @@
 import { getConvexClient } from "@/lib/convex";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
-import { auth } from "@clerk/nextjs/server";
+import { requireAuth } from "@/lib/auth-utils";
 
 export async function createDirectPurchase({
   eventId,
@@ -20,8 +20,8 @@ export async function createDirectPurchase({
   userId: string;
 }): Promise<{ success: boolean; error?: string }> {
   try {
-    const { userId: authenticatedUserId } = await auth();
-    if (!authenticatedUserId || authenticatedUserId !== userId) {
+    const user = await requireAuth();
+    if (user.id !== userId) {
       throw new Error("Not authenticated");
     }
 

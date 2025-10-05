@@ -1,4 +1,4 @@
-import { auth } from "@clerk/nextjs/server";
+import { requireAuth } from "@/lib/auth-utils";
 import { redirect } from "next/navigation";
 import { getSellerDashboardData } from "@/app/actions/getSellerDashboardData";
 import {
@@ -11,8 +11,9 @@ import {
 import { CustomerListTable } from "@/components/CustomerListTable";
 
 export default async function SellerCustomersPage() {
-  const { userId } = await auth();
-  if (!userId) redirect("/");
+  const user = await requireAuth().catch(() => redirect("/sign-in"));
+  if (!user) redirect("/sign-in");
+  const userId = user.id;
 
   const data = await getSellerDashboardData({ userId });
   const { customersLight } = data;

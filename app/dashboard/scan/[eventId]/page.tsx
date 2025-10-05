@@ -1,4 +1,4 @@
-import { auth } from "@clerk/nextjs/server";
+import { requireAuth } from "@/lib/auth-utils";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -11,8 +11,8 @@ export default async function EventScanPage({
 }: {
   params: Promise<{ eventId: string }>;
 }) {
-  const { userId } = await auth();
-  if (!userId) redirect("/");
+  const user = await requireAuth().catch(() => redirect("/sign-in"));
+  if (!user) redirect("/sign-in");
 
   const { eventId } = await params;
 

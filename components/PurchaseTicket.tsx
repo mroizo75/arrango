@@ -8,7 +8,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { CreditCard, FileText } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useUser } from "@clerk/nextjs";
+import { useSession } from "next-auth/react";
 import { api } from "@/convex/_generated/api";
 import { useQuery } from "convex/react";
 import ReleaseTicket from "./ReleaseTicket";
@@ -17,7 +17,8 @@ import { Ticket } from "lucide-react";
 
 export default function PurchaseTicket({ eventId }: { eventId: Id<"events"> }) {
   const router = useRouter();
-  const { user } = useUser();
+  const { data: session } = useSession();
+  const user = session?.user;
   const queuePosition = useQuery(api.waitingList.getQueuePosition, {
     eventId,
     userId: user?.id ?? "",

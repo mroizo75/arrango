@@ -50,6 +50,7 @@ export const create = mutation({
     price: v.number(),
     totalTickets: v.number(),
     userId: v.string(),
+    imageStorageId: v.optional(v.id("_storage")),
     // Event details
     checkInTime: v.optional(v.string()),
     refundPolicy: v.optional(v.string()),
@@ -69,6 +70,7 @@ export const create = mutation({
       price: args.price,
       totalTickets: args.totalTickets,
       userId: args.userId,
+      imageStorageId: args.imageStorageId,
       checkInTime: args.checkInTime,
       refundPolicy: args.refundPolicy,
       ageRestriction: args.ageRestriction,
@@ -524,6 +526,7 @@ export const updateEvent = mutation({
     currency: v.optional(v.string()),
     price: v.number(),
     totalTickets: v.number(),
+    imageStorageId: v.optional(v.id("_storage")),
     // Event details
     checkInTime: v.optional(v.string()),
     refundPolicy: v.optional(v.string()),

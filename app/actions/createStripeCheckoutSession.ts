@@ -6,7 +6,7 @@ import { getStripeCurrencyCode, safeCurrencyCode } from "@/lib/currency";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import baseUrl from "@/lib/baseUrl";
-import { auth } from "@clerk/nextjs/server";
+import { requireAuth } from "@/lib/auth-utils";
 import { DURATIONS } from "@/convex/constants";
 
 export type StripeCheckoutMetaData = {
@@ -48,8 +48,8 @@ export async function createStripeCheckoutSession({
   }>;
   paymentMethod?: 'card' | 'invoice';
 }) {
-  const { userId } = await auth();
-  if (!userId) throw new Error("Not authenticated");
+  const user = await requireAuth();
+  const userId = user.id;
 
   const convex = getConvexClient();
 

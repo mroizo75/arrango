@@ -2,7 +2,7 @@
 import { createStripeConnectAccountLink } from "@/app/actions/createStripeConnectAccountLink";
 import { createStripeConnectCustomer } from "@/app/actions/createStripeConnectCustomer";
 import { api } from "@/convex/_generated/api";
-import { useUser } from "@clerk/nextjs";
+import { useSession } from "next-auth/react";
 import { useQuery } from "convex/react";
 
 import { useRouter } from "next/navigation";
@@ -27,7 +27,8 @@ export default function SellerDashboard() {
     null
   );
   const router = useRouter();
-  const { user } = useUser();
+  const { data: session } = useSession();
+  const user = session?.user;
   const stripeConnectId = useQuery(api.users.getUsersStripeConnectId, {
     userId: user?.id || "",
   });

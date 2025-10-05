@@ -5,7 +5,7 @@ import { ConvexClientProvider } from "@/components/ConvexClientProvider";
 import { ConditionalHeader } from "@/components/ConditionalHeader";
 import Footer from "@/components/Footer";
 import { Toaster } from "@/components/ui/toaster";
-import { ClerkProvider } from "@clerk/nextjs";
+import { SessionProviderWrapper } from "@/components/SessionProviderWrapper";
 import SyncUserWithConvex from "@/components/SyncUserWithConvex";
 import { CookieConsentProvider } from "@/hooks/useCookieConsent";
 import ClientWrapper from "@/components/ClientWrapper";
@@ -148,12 +148,7 @@ export default function RootLayout({
       </head>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <CookieConsentProvider>
-          <ClerkProvider
-            signInUrl="/sign-in"
-            signUpUrl="/sign-up"
-            afterSignInUrl="/dashboard"
-            afterSignUpUrl="/dashboard"
-          >
+          <SessionProviderWrapper>
             <ConvexClientProvider>
               <ConditionalHeader />
               <SyncUserWithConvex />
@@ -163,7 +158,7 @@ export default function RootLayout({
                 <Toaster />
               </ClientWrapper>
             </ConvexClientProvider>
-          </ClerkProvider>
+          </SessionProviderWrapper>
         </CookieConsentProvider>
       </body>
     </html>

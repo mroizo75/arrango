@@ -15,7 +15,7 @@ import {
   StarIcon,
   User,
 } from "lucide-react";
-import { useUser } from "@clerk/nextjs";
+import { useSession } from "next-auth/react";
 import PurchaseTicket from "./PurchaseTicket";
 import { useRouter } from "next/navigation";
 import { useStorageUrl } from "@/lib/hooks";
@@ -29,7 +29,8 @@ interface EventCardProps {
 }
 
 export default function EventCard({ eventId, showAdditionalPurchase = false }: EventCardProps) {
-  const { user } = useUser();
+  const { data: session } = useSession();
+  const user = session?.user;
   const router = useRouter();
   const event = useQuery(api.events.getById, { eventId });
   const availability = useQuery(api.events.getEventAvailability, { eventId });

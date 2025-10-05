@@ -28,7 +28,7 @@ A modern, real-time event ticketing platform built with Next.js 14, Convex, Cler
 ### Technical Features
 
 - 🚀 Real-time updates using Convex
-- 👤 Authentication with Clerk
+- 👤 Authentication with NextAuth v4
 - 💳 Payment processing with Stripe Connect
 - 🌐 Server-side and client-side rendering
 - 🎨 Modern UI with Tailwind CSS and shadcn/ui
@@ -50,28 +50,13 @@ A modern, real-time event ticketing platform built with Next.js 14, Convex, Cler
 
 ## Mobile/WebView Compatibility
 
-### Clerk Authentication Issues on iOS Safari/WebView
-
-If users experience 404 errors or redirects to Safari when using "Kom i gang gratis" button on mobile (especially iOS), this is due to Clerk's modal authentication not working properly in WebView environments.
-
-**Solution implemented:**
-- Dedicated `/sign-in` and `/sign-up` pages for all browsers
-- Always uses `redirect` mode to avoid WebView/Safari modal issues
-- Proper redirect URL configuration in `ClerkProvider`
+NextAuth v4 fungerer godt i både vanlige nettlesere og WebView-miljøer. Autentiseringen håndteres via server-side sessions med JWT-tokens.
 
 **For Capacitor/iOS App:**
-If you're building a mobile app with Capacitor, make sure to:
-1. Add Clerk domains to `allowNavigation` in `capacitor.config.js`
-2. Use redirect mode for authentication
-3. Configure proper redirect URLs in Clerk dashboard
-
-**Environment Variables for Clerk:**
-```env
-NEXT_PUBLIC_CLERK_SIGN_IN_URL=/sign-in
-NEXT_PUBLIC_CLERK_SIGN_UP_URL=/sign-up
-NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL=/dashboard
-NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL=/dashboard
-```
+Hvis du bygger en mobil app med Capacitor:
+1. Sørg for at app-domenet er i `allowNavigation` i `capacitor.config.js`
+2. NextAuth sessions fungerer ut av boksen
+3. Ingen ekstra konfigurasjon nødvendig
 
 ## Getting Started
 
@@ -80,17 +65,18 @@ NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL=/dashboard
 - Node.js 18+
 - npm/yarn
 - Stripe Account
-- Clerk Account
 - Convex Account
 
 ### Environment Variables
 
-Create a `.env.local` file with:
+Se `ENV_SETUP.md` for detaljert oppsett av environment-variabler.
+
+Kort versjon - opprett `.env.local`:
 
 ```bash
+NEXTAUTH_SECRET=generer_med_openssl_rand_base64_32
+NEXTAUTH_URL=http://localhost:3000
 NEXT_PUBLIC_CONVEX_URL=your_convex_url
-NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=your_clerk_key
-CLERK_SECRET_KEY=your_clerk_secret
 STRIPE_SECRET_KEY=your_stripe_secret
 STRIPE_WEBHOOK_SECRET=your_webhook_secret
 NEXT_PUBLIC_APP_URL=http://localhost:3000
@@ -112,12 +98,14 @@ npm run dev
 npx convex dev
 ```
 
-### Setting up Clerk
+### Setting up NextAuth
 
-1. [Create a Clerk application by Clicking here!](https://go.clerk.com/34AwsuT)
-2. Configure authentication providers
-3. Set up redirect URLs
-4. Add environment variables
+1. Generer en secret nøkkel:
+   ```bash
+   openssl rand -base64 32
+   ```
+2. Legg til `NEXTAUTH_SECRET` og `NEXTAUTH_URL` i `.env.local`
+3. Autentiseringen er klar!
 
 ### Setting up Convex
 

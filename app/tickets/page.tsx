@@ -2,15 +2,14 @@
 
 import { api } from "@/convex/_generated/api";
 import { useQuery } from "convex/react";
-import { useUser } from "@clerk/nextjs";
+import { useSession } from "next-auth/react";
 import TicketCard from "@/components/TicketCard";
-import OrganizationNumberForm from "@/components/OrganizationNumberForm";
 import { Ticket } from "lucide-react";
 
 export default function MyTicketsPage() {
-  const { user } = useUser();
+  const { data: session } = useSession();
   const tickets = useQuery(api.events.getUserTickets, {
-    userId: user?.id ?? "",
+    userId: session?.user?.id ?? "",
   });
 
   if (!tickets) return null;
@@ -43,11 +42,6 @@ export default function MyTicketsPage() {
               </span>
             </div>
           </div>
-        </div>
-
-        {/* Organization Number Form */}
-        <div className="mb-8">
-          <OrganizationNumberForm />
         </div>
 
         {upcomingTickets.length > 0 && (

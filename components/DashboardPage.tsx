@@ -32,7 +32,7 @@ import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
-import { useUser } from "@clerk/nextjs";
+import { useSession } from "next-auth/react";
 
 type OverviewData = {
   totalEvents: number;
@@ -90,7 +90,8 @@ export function DashboardPage({
   eventPerformance,
   currentPage,
 }: SellerDashboardPageProps) {
-  const { user } = useUser();
+  const { data: session } = useSession();
+  const user = session?.user;
   const events = useQuery(api.events.getSellerEvents, {
     userId: user?.id ?? "",
   });

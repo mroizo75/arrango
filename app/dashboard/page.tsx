@@ -1,15 +1,21 @@
 import { DashboardPage } from "@/components/DashboardPage";
-import { auth } from "@clerk/nextjs/server";
+import { requireAuth } from "@/lib/auth-utils";
 import { redirect } from "next/navigation";
 import { getSellerDashboardData } from "@/app/actions/getSellerDashboardData";
+import { Suspense } from "react";
+import DashboardClient from "./DashboardClient";
+import Spinner from "@/components/Spinner";
 
 export default async function SellerPage({
   searchParams,
 }: {
   searchParams?: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  const { userId } = await auth();
-  if (!userId) redirect("/");
+  const user = await requireAuth().catch(() => {
+    redirect("/sign-in");
+  });
+  if (!user) redirect("/sign-in");
+  const userId = user.id;
 
   const params = (await searchParams) ?? {};
   const pageParam = params.page;
@@ -23,7 +29,9 @@ export default async function SellerPage({
   });
 
   return (
-    <div className="min-h-screen bg-background">
+    <Suspense fallback={<div className="flex items-center justify-center min-h-screen"><Spinner /></div>}>
+      <DashboardClient>
+        <div className="min-h-screen bg-background">
       <main className="flex min-h-screen flex-col">
         <header className="border-b px-8 py-6">
           <div className="flex items-center justify-between">
@@ -60,5 +68,7 @@ export default async function SellerPage({
         </section>
       </main>
     </div>
+      </DashboardClient>
+    </Suspense>
   );
 }

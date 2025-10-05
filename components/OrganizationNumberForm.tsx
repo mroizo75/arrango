@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useUser } from "@clerk/nextjs";
+import { useSession } from "next-auth/react";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Button } from "@/components/ui/button";
@@ -37,7 +37,8 @@ interface ValidationResult {
 }
 
 export default function OrganizationNumberForm() {
-  const { user } = useUser();
+  const { data: session } = useSession();
+  const user = session?.user;
   const { toast } = useToast();
   const [organizationNumber, setOrganizationNumber] = useState("");
   const [isLoading, setIsLoading] = useState(false);

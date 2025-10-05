@@ -3,18 +3,15 @@
 import { stripe } from "@/lib/stripe";
 import { getConvexClient } from "@/lib/convex";
 import { api } from "@/convex/_generated/api";
+import { requireAuth } from "@/lib/auth-utils";
 
 export async function createStripeConnectLoginLink(stripeAccountId?: string) {
   let accountId = stripeAccountId;
 
   if (!accountId) {
     const convex = getConvexClient();
-    const { userId } = await import("@clerk/nextjs/server").then((module) =>
-      module.auth()
-    );
-    if (!userId) {
-      throw new Error("User not authenticated");
-    }
+    const user = await requireAuth();
+    const userId = user.id;
 
     const fetchedAccountId = await convex.query(
       api.users.getUsersStripeConnectId,

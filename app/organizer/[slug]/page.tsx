@@ -31,7 +31,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       title: `${organizer.organizerName} | Arrango`,
       description,
       keywords: [
-        organizer.organizerName,
+        organizer.organizerName || "Organizer",
         "arrangør",
         "organizer",
         "events",
@@ -41,7 +41,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         "billetter",
         "tickets",
         organizer.organizerCity || "worldwide",
-      ],
+      ].filter(Boolean),
       openGraph: {
         title: `${organizer.organizerName} - Arrangør`,
         description,

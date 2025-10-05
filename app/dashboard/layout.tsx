@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { ReactNode } from "react";
-import { auth } from "@clerk/nextjs/server";
+import { requireAuth } from "@/lib/auth-utils";
 import { redirect } from "next/navigation";
 import { api } from "@/convex/_generated/api";
 import { getConvexClient } from "@/lib/convex";
@@ -11,15 +11,16 @@ export const metadata: Metadata = {
 };
 
 export default async function DashboardLayout({ children }: { children: ReactNode }) {
-  const { userId } = await auth();
-  if (!userId) redirect("/");
+  const user = await requireAuth().catch(() => redirect("/sign-in"));
+  if (!user) redirect("/sign-in");
+  const userId = user.id;
 
-  // Check if user has any events (is a seller)
+  // Check if user is an organizer
   const convex = getConvexClient();
-  const events = await convex.query(api.events.getSellerEvents, { userId });
+  const organizerProfile = await convex.query(api.organizerProfile.getOrganizerProfileByUserId, { userId });
 
-  if (events.length === 0) {
-    // User is not a seller, redirect to home
+  if (!organizerProfile || !organizerProfile.isOrganizer) {
+    // User is not an organizer, redirect to home
     redirect("/");
   }
 

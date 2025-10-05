@@ -2,7 +2,7 @@
 
 import { api } from "@/convex/_generated/api";
 import { useQuery } from "convex/react";
-import { useUser } from "@clerk/nextjs";
+import { useSession } from "next-auth/react";
 import {
   CalendarDays,
   Edit,
@@ -20,7 +20,8 @@ import { Doc } from "@/convex/_generated/dataModel";
 import { Metrics } from "@/convex/events";
 
 export default function SellerEventList() {
-  const { user } = useUser();
+  const { data: session } = useSession();
+  const user = session?.user;
   const events = useQuery(api.events.getSellerEvents, {
     userId: user?.id ?? "",
   });
@@ -111,7 +112,7 @@ function SellerEventCard({
                 {!isPastEvent && !event.is_cancelled && (
                   <>
                     <Link
-                      href={`/seller/events/${event._id}/edit`}
+                      href={`/dashboard/events/${event._id}/edit`}
                       className="shrink-0 flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
                     >
                       <Edit className="w-4 h-4" />

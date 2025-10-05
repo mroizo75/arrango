@@ -5,14 +5,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { CheckCircle, Ticket, CreditCard, TrendingUp, Users, Zap, Star, Award, Shield } from "lucide-react";
 import Link from "next/link";
-import { SignInButton, SignUpButton } from "@clerk/nextjs";
 import { useEffect, useRef, useState } from "react";
-import { useClerkMode } from "@/hooks/useClerkMode";
 
 export default function ArrangorerPage() {
   const [isVisible, setIsVisible] = useState(false);
   const heroRef = useRef<HTMLElement>(null);
-  const clerkMode = useClerkMode();
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -69,11 +66,11 @@ export default function ArrangorerPage() {
                   : 'opacity-0 translate-y-4'
               }`}>
 
-                  <SignUpButton mode={clerkMode}>
+                  <Link href="/become-organizer">
                     <Button size="lg" className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 text-lg">
                       Kom i gang gratis →
                     </Button>
-                  </SignUpButton>
+                  </Link>
 
                 <Link href="#features">
                   <Button variant="outline" size="lg" className="px-8 py-3 text-lg">
@@ -91,11 +88,11 @@ export default function ArrangorerPage() {
                 <p className="text-gray-600 text-sm mr-4 flex items-center">
                   Har du allerede konto?
                 </p>
-                <SignInButton mode={clerkMode} >
+                <Link href="/sign-in">
                   <Button variant="outline" size="sm">
                     Logg inn her
                   </Button>
-                </SignInButton>
+                </Link>
               </div>
             </div>
             <div className={`relative transition-all duration-700 delay-1000 ${
@@ -444,11 +441,11 @@ export default function ArrangorerPage() {
                   </div>
                 </div>
                 <div className="w-full">
-                  <SignUpButton mode={clerkMode}>
+                  <Link href="/become-organizer">
                     <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white mt-6">
                       Start gratis nå
                     </Button>
-                  </SignUpButton>
+                  </Link>
                 </div>
               </CardContent>
             </Card>
@@ -545,11 +542,11 @@ export default function ArrangorerPage() {
             Ingen risiko, ingen bindingstid.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <SignUpButton mode={clerkMode}>
+            <Link href="/become-organizer">
               <Button size="lg" className="bg-white text-blue-600 hover:bg-blue-100 hover:text-blue-600 px-8 py-3">
                 Start gratis nå →
               </Button>
-            </SignUpButton>
+            </Link>
             <Link href="mailto:support@arrango.no">
               <Button variant="outline" size="lg" className="border-white text-blue-600 hover:bg-blue-600 hover:text-white px-8 py-3">
                 Kontakt oss

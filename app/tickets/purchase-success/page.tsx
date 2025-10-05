@@ -1,6 +1,6 @@
 import { getConvexClient } from "@/lib/convex";
 import { api } from "@/convex/_generated/api";
-import { auth } from "@clerk/nextjs/server";
+import { requireAuth } from "@/lib/auth-utils";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import Ticket from "@/components/Ticket";
@@ -10,8 +10,9 @@ async function TicketSuccess({
 }: {
   searchParams: Promise<{ session_id?: string; free?: string }>;
 }) {
-  const { userId } = await auth();
-  if (!userId) redirect("/");
+  const user = await requireAuth().catch(() => redirect("/sign-in"));
+  if (!user) redirect("/sign-in");
+  const userId = user.id;
 
   const params = await searchParams;
   const sessionId = params.session_id;

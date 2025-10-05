@@ -1,4 +1,4 @@
-import { auth } from "@clerk/nextjs/server";
+import { requireAuth } from "@/lib/auth-utils";
 import { redirect } from "next/navigation";
 import { TicketScanner } from "@/components/TicketScanner";
 import Link from "next/link";
@@ -6,8 +6,8 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 
 export default async function ScanPage() {
-  const { userId } = await auth();
-  if (!userId) redirect("/");
+  const user = await requireAuth().catch(() => redirect("/sign-in"));
+  if (!user) redirect("/sign-in");
 
   return (
     <div className="space-y-6 p-8">

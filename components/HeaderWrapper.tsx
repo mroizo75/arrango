@@ -1,17 +1,26 @@
 'use client';
 
-import { useUser } from "@clerk/nextjs";
+import { useSession } from "next-auth/react";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import Header from "./Header";
 
 export default function HeaderWrapper() {
-  const { user } = useUser();
+  const { data: session } = useSession();
+  
+  // Check if user has events
   const events = useQuery(api.events.getSellerEvents, {
-    userId: user?.id ?? "",
+    userId: session?.user?.id ?? "",
   });
 
-  const isSeller = events ? events.length > 0 : false;
+  // Check if user is an organizer in Convex
+  const organizerProfile = useQuery(
+    api.organizerProfile.getOrganizerProfileByUserId,
+    session?.user?.id ? { userId: session.user.id } : "skip"
+  );
+
+  // User is a seller if they have events OR if they're an organizer
+  const isSeller = (events && events.length > 0) || (organizerProfile?.isOrganizer === true);
 
   return <Header isSeller={isSeller} />;
 }
