@@ -120,7 +120,6 @@ export default function EventForm({ mode, initialData }: EventFormProps) {
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const generateUploadUrl = useMutation(api.storage.generateUploadUrl);
-  const updateEventImage = useMutation(api.storage.updateEventImage);
   const deleteImage = useMutation(api.storage.deleteImage);
 
   const [removedCurrentImage, setRemovedCurrentImage] = useState(false);
@@ -169,11 +168,11 @@ export default function EventForm({ mode, initialData }: EventFormProps) {
     startTransition(() => {
       (async () => {
         try {
-          let imageStorageId = null;
+          let imageStorageId: Id<"_storage"> | null = null;
 
           // Handle image changes
           if (selectedImage) {
-            imageStorageId = await handleImageUpload(selectedImage);
+            imageStorageId = await handleImageUpload(selectedImage) as Id<"_storage"> | null;
             if (mode === "edit" && !removedCurrentImage && currentImageUrl) {
               await deleteImage({ storageId: initialData!.imageStorageId! });
             }
@@ -202,7 +201,7 @@ export default function EventForm({ mode, initialData }: EventFormProps) {
           };
 
           if (mode === "create") {
-            const eventId = await createEvent({
+            await createEvent({
               userId: user.id,
               ...eventData,
             });
