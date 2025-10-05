@@ -49,26 +49,7 @@ export function ShareEvent({
     }
   };
 
-  // Try native Web Share API first (works great on mobile)
-  const handleNativeShare = async () => {
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          title: eventName,
-          text: eventDescription,
-          url: eventUrl,
-        });
-      } catch (err) {
-        // User cancelled or share failed, fallback to copy
-        if (err instanceof Error && err.name !== 'AbortError') {
-          handleCopyLink();
-        }
-      }
-    } else {
-      // Fallback to copy for desktop
-      handleCopyLink();
-    }
-  };
+ 
 
   const shareToFacebook = () => {
     const url = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(eventUrl)}&quote=${encodeURIComponent(`${eventName} - ${eventDescription}`)}`;
