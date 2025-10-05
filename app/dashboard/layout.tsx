@@ -27,7 +27,7 @@ export default async function DashboardLayout({ children }: { children: ReactNod
   return (
     <div className="min-h-screen bg-background text-foreground">
       <DashboardSidebar />
-      <div className="w-full lg:ml-72 pt-[57px] lg:pt-0">
+      <div className="lg:ml-72 pt-[57px] lg:pt-0 dashboard-content">
         {children}
       </div>
     </div>

@@ -1,6 +1,7 @@
 "use client";
 
 import EventCard from "@/components/EventCard";
+import { ShareEvent } from "@/components/ShareEvent";
 import { Id } from "@/convex/_generated/dataModel";
 import { api } from "@/convex/_generated/api";
 import { useQuery } from "convex/react";
@@ -222,6 +223,13 @@ export default function EventPageClient({ eventId }: Props) {
                 <div>
                   <div className="sticky top-8 space-y-4">
                     <EventCard eventId={eventId} showAdditionalPurchase={true} />
+
+                    <ShareEvent
+                      eventName={event.name}
+                      eventUrl={`${typeof window !== 'undefined' ? window.location.origin : 'https://arrango.no'}/event/${eventId}`}
+                      eventDescription={event.description}
+                      className="w-full"
+                    />
 
                     {user ? (
                       <JoinQueue

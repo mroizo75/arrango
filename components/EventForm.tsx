@@ -301,7 +301,7 @@ export default function EventForm({ mode, initialData }: EventFormProps) {
   };
 
   return (
-    <div className="max-w-4xl mx-auto p-6">
+    <div className="w-full">
       {/* Stripe Warning */}
       {!hasStripe && mode === "create" && (
         <Alert className="mb-6 border-blue-200 bg-blue-50">

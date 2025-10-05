@@ -3,7 +3,6 @@ import localFont from "next/font/local";
 import "./globals.css";
 import { ConvexClientProvider } from "@/components/ConvexClientProvider";
 import { ConditionalHeader } from "@/components/ConditionalHeader";
-import Footer from "@/components/Footer";
 import { Toaster } from "@/components/ui/toaster";
 import { SessionProviderWrapper } from "@/components/SessionProviderWrapper";
 import SyncUserWithConvex from "@/components/SyncUserWithConvex";
@@ -146,7 +145,7 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
 
       </head>
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased overflow-x-hidden`}>
         <CookieConsentProvider>
           <SessionProviderWrapper>
             <ConvexClientProvider>
@@ -154,7 +153,6 @@ export default function RootLayout({
               <SyncUserWithConvex />
               <ClientWrapper>
                 {children}
-                <Footer />
                 <Toaster />
               </ClientWrapper>
             </ConvexClientProvider>

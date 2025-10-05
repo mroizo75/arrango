@@ -5,6 +5,7 @@ import { api } from "@/convex/_generated/api";
 import { useStorageUrl } from "@/lib/hooks";
 import Spinner from "@/components/Spinner";
 import { Badge } from "@/components/ui/badge";
+import { ShareEvent } from "@/components/ShareEvent";
 import {
   Globe,
   Phone,
@@ -30,6 +31,8 @@ interface EventItemProps {
     location: string;
     imageStorageId?: string;
     price?: number;
+    organizerSlug: string;
+    organizerName: string;
   };
 }
 
@@ -107,16 +110,26 @@ function EventItem({ event }: EventItemProps) {
               </div>
             </div>
 
-            {/* CTA Button */}
-            <Link
-              href={`/event/${event._id}`}
-              className="inline-flex items-center justify-center w-full lg:w-auto px-4 py-2 bg-black/80 backdrop-blur-sm text-white font-medium rounded-md border border-white/20 shadow-lg hover:bg-black/90 transition-all duration-200 text-sm"
-            >
-              Finn billetter
-              <svg className="w-3 h-3 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
-            </Link>
+            {/* Share & CTA Buttons */}
+            <div className="flex flex-col sm:flex-row gap-3">
+              <ShareEvent
+                eventName={event.name}
+                eventUrl={`${typeof window !== 'undefined' ? window.location.origin : 'https://arrango.no'}/event/${event._id}`}
+                eventDescription={`Arrangement av ${event.organizerName}`}
+                variant="outline"
+                size="sm"
+                className="flex-1 sm:flex-none"
+              />
+              <Link
+                href={`/event/${event._id}`}
+                className="inline-flex items-center justify-center w-full lg:w-auto px-4 py-2 bg-black/80 backdrop-blur-sm text-white font-medium rounded-md border border-white/20 shadow-lg hover:bg-black/90 transition-all duration-200 text-sm"
+              >
+                Finn billetter
+                <svg className="w-3 h-3 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </Link>
+            </div>
           </div>
         </div>
       </div>
@@ -304,6 +317,17 @@ export default function OrganizerPageClient({ slug }: Props) {
                   )}
                 </div>
 
+                {/* Share Organizer */}
+                <div className="mt-6">
+                  <ShareEvent
+                    eventName={`${organizer.organizerName} - Arrangør`}
+                    eventUrl={`${typeof window !== 'undefined' ? window.location.origin : 'https://arrango.no'}/organizer/${slug}`}
+                    eventDescription={organizer.organizerBio || organizer.organizerDescription || ""}
+                    variant="outline"
+                    size="default"
+                  />
+                </div>
+
                 {/* Contact & Social Links */}
                 <div className="flex flex-wrap gap-4">
                   {organizer.organizerWebsite && (
@@ -418,7 +442,11 @@ export default function OrganizerPageClient({ slug }: Props) {
                     {/* Events for this month */}
                     <div className="space-y-4">
                       {monthEvents.map((event) => (
-                        <EventItem key={event._id} event={event} />
+                        <EventItem key={event._id} event={{
+                          ...event,
+                          organizerSlug: organizer.organizerSlug || "",
+                          organizerName: organizer.organizerName || ""
+                        }} />
                       ))}
                     </div>
                   </div>
