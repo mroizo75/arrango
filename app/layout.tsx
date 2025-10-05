@@ -148,7 +148,12 @@ export default function RootLayout({
       </head>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <CookieConsentProvider>
-          <ClerkProvider>
+          <ClerkProvider
+            signInUrl="/sign-in"
+            signUpUrl="/sign-up"
+            afterSignInUrl="/dashboard"
+            afterSignUpUrl="/dashboard"
+          >
             <ConvexClientProvider>
               <ConditionalHeader />
               <SyncUserWithConvex />

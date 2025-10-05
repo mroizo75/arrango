@@ -48,6 +48,31 @@ A modern, real-time event ticketing platform built with Next.js 14, Convex, Cler
 - 🔄 Loading states and animations
 - 💫 Micro-interactions for better engagement
 
+## Mobile/WebView Compatibility
+
+### Clerk Authentication Issues on iOS Safari/WebView
+
+If users experience 404 errors or redirects to Safari when using "Kom i gang gratis" button on mobile (especially iOS), this is due to Clerk's modal authentication not working properly in WebView environments.
+
+**Solution implemented:**
+- Dedicated `/sign-in` and `/sign-up` pages for all browsers
+- Always uses `redirect` mode to avoid WebView/Safari modal issues
+- Proper redirect URL configuration in `ClerkProvider`
+
+**For Capacitor/iOS App:**
+If you're building a mobile app with Capacitor, make sure to:
+1. Add Clerk domains to `allowNavigation` in `capacitor.config.js`
+2. Use redirect mode for authentication
+3. Configure proper redirect URLs in Clerk dashboard
+
+**Environment Variables for Clerk:**
+```env
+NEXT_PUBLIC_CLERK_SIGN_IN_URL=/sign-in
+NEXT_PUBLIC_CLERK_SIGN_UP_URL=/sign-up
+NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL=/dashboard
+NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL=/dashboard
+```
+
 ## Getting Started
 
 ### Prerequisites
