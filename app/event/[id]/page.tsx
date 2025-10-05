@@ -58,7 +58,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         url: `https://arrango.no/event/${resolvedParams.id}`,
         images: event.imageStorageId ? [
           {
-            url: `/api/image-proxy?storageId=${event.imageStorageId}`,
+            url: `https://arrango.no/api/image-proxy?storageId=${event.imageStorageId}`,
             width: 1200,
             height: 630,
             alt: `${event.name} - ${event.location}`,
@@ -69,7 +69,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         card: "summary_large_image",
         title: `${event.name} - ${formattedDate}`,
         description: `${event.name} i ${event.location}`,
-        images: event.imageStorageId ? [`/api/image-proxy?storageId=${event.imageStorageId}`] : [],
+        images: event.imageStorageId ? [`https://arrango.no/api/image-proxy?storageId=${event.imageStorageId}`] : [],
       },
       alternates: {
         canonical: `https://arrango.no/event/${resolvedParams.id}`,

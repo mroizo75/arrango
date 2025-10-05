@@ -49,7 +49,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         url: `https://arrango.no/organizer/${resolvedParams.slug}`,
         images: organizer.organizerLogoStorageId ? [
           {
-            url: `/api/image-proxy?storageId=${organizer.organizerLogoStorageId}`,
+            url: `https://arrango.no/api/image-proxy?storageId=${organizer.organizerLogoStorageId}`,
             width: 400,
             height: 400,
             alt: `${organizer.organizerName} logo`,
@@ -60,7 +60,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         card: "summary",
         title: `${organizer.organizerName} - Arrangør`,
         description: `${organizer.organizerName} - Finn deres arrangementer og kjøp billetter.`,
-        images: organizer.organizerLogoStorageId ? [`/api/image-proxy?storageId=${organizer.organizerLogoStorageId}`] : [],
+        images: organizer.organizerLogoStorageId ? [`https://arrango.no/api/image-proxy?storageId=${organizer.organizerLogoStorageId}`] : [],
       },
       alternates: {
         canonical: `https://arrango.no/organizer/${resolvedParams.slug}`,
