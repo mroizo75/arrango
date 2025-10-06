@@ -12,6 +12,7 @@ export default defineSchema({
     totalTickets: v.number(),
     userId: v.string(),
     imageStorageId: v.optional(v.id("_storage")),
+    imageUrl: v.optional(v.string()), // Public URL for sharing
     is_cancelled: v.optional(v.boolean()),
     // Event details that organizers can customize
     checkInTime: v.optional(v.string()), // "30 minutes before"

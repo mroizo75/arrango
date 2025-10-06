@@ -76,6 +76,7 @@ interface InitialEventData {
   price: number;
   totalTickets: number;
   imageStorageId?: Id<"_storage">;
+  imageUrl?: string;
   checkInTime?: string;
   refundPolicy?: string;
   ageRestriction?: string;

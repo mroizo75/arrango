@@ -51,6 +51,7 @@ export const create = mutation({
     totalTickets: v.number(),
     userId: v.string(),
     imageStorageId: v.optional(v.id("_storage")),
+    imageUrl: v.optional(v.string()), // Public image URL for sharing
     // Event details
     checkInTime: v.optional(v.string()),
     refundPolicy: v.optional(v.string()),
@@ -71,6 +72,7 @@ export const create = mutation({
       totalTickets: args.totalTickets,
       userId: args.userId,
       imageStorageId: args.imageStorageId,
+      imageUrl: args.imageUrl,
       checkInTime: args.checkInTime,
       refundPolicy: args.refundPolicy,
       ageRestriction: args.ageRestriction,
@@ -80,6 +82,19 @@ export const create = mutation({
       venueDetails: args.venueDetails,
     });
     return eventId;
+  },
+});
+
+// Update event image URL for public sharing
+export const updateEventImageUrl = mutation({
+  args: {
+    eventId: v.id("events"),
+    imageUrl: v.string(),
+  },
+  handler: async (ctx, { eventId, imageUrl }) => {
+    await ctx.db.patch(eventId, {
+      imageUrl,
+    });
   },
 });
 
