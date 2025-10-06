@@ -56,7 +56,7 @@ export default function EventPageClient({ eventId }: Props) {
     organizer: organizer ? {
       "@type": "Organization",
       name: organizer.organizerName,
-      url: `https://arrango.no/organizer/${organizer.organizerSlug}`,
+      url: `https://www.arrango.no/organizer/${organizer.organizerSlug}`,
     } : undefined,
     offers: {
       "@type": "Offer",
@@ -106,12 +106,12 @@ export default function EventPageClient({ eventId }: Props) {
                     {organizer?.organizerSlug && (
                       <div className="flex items-center gap-2 text-sm text-gray-600">
                         <span>Arrangør:</span>
-                        <Link
-                          href={`/organizer/${organizer.organizerSlug}`}
-                          className="text-blue-600 hover:underline font-medium"
-                        >
-                          {organizer.organizerName}
-                        </Link>
+                              <Link
+                                href={`${process.env.NEXT_PUBLIC_SITE_URL || 'https://www.arrango.no'}/organizer/${organizer.organizerSlug}`}
+                                className="text-blue-600 hover:underline font-medium"
+                              >
+                                {organizer.organizerName}
+                              </Link>
                       </div>
                     )}
                   </div>
@@ -226,7 +226,7 @@ export default function EventPageClient({ eventId }: Props) {
 
                     <ShareEvent
                       eventName={event.name}
-                      eventUrl={`${typeof window !== 'undefined' ? window.location.origin : 'https://arrango.no'}/event/${eventId}`}
+                      eventUrl={`${typeof window !== 'undefined' ? window.location.origin : (process.env.NEXT_PUBLIC_SITE_URL || 'https://www.arrango.no')}/event/${eventId}`}
                       eventDescription={event.description}
                       className="w-full"
                     />

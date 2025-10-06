@@ -86,17 +86,50 @@ export const create = mutation({
 });
 
 // Update event image URL for public sharing
-export const updateEventImageUrl = mutation({
-  args: {
-    eventId: v.id("events"),
-    imageUrl: v.string(),
-  },
-  handler: async (ctx, { eventId, imageUrl }) => {
-    await ctx.db.patch(eventId, {
-      imageUrl,
-    });
-  },
-});
+  export const updateEventImageUrl = mutation({
+    args: {
+      eventId: v.id("events"),
+      imageUrl: v.string(),
+    },
+    handler: async (ctx, { eventId, imageUrl }) => {
+      await ctx.db.patch(eventId, {
+        imageUrl,
+      });
+    },
+  });
+
+  // Migration function to update existing events with imageUrl based on imageStorageId
+  export const migrateEventImageUrls = mutation({
+    args: {},
+    handler: async (ctx) => {
+      const events = await ctx.db.query("events").collect();
+
+      const eventsToUpdate = events.filter(event => event.imageStorageId && !event.imageUrl);
+
+      console.log(`Found ${eventsToUpdate.length} events to migrate`);
+
+      for (const event of eventsToUpdate) {
+        if (event.imageStorageId) {
+          try {
+            // Get the URL for the storage ID
+            const imageUrl = await ctx.storage.getUrl(event.imageStorageId);
+
+            if (imageUrl) {
+              // Update the event with the image URL
+              await ctx.db.patch(event._id, {
+                imageUrl,
+              });
+              console.log(`Migrated event ${event._id} with imageUrl: ${imageUrl}`);
+            }
+          } catch (error) {
+            console.error(`Failed to migrate event ${event._id}:`, error);
+          }
+        }
+      }
+
+      return { migratedCount: eventsToUpdate.length };
+    },
+  });
 
 // Helper function to check ticket availability for an event
 export const checkAvailability = query({
