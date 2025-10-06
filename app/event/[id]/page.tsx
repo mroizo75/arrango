@@ -67,7 +67,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
           },
         ] : event.imageStorageId ? [
           {
-            url: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://www.arrango.no'}/api/image-proxy?storageId=${event.imageStorageId}`,
+            url: `https://ceaseless-tapir-769.convex.cloud/api/storage/${event.imageStorageId}`,
             width: 1200,
             height: 630,
             alt: `${event.name} - ${event.location}`,
@@ -86,7 +86,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         card: "summary_large_image",
         title: `${event.name} - ${formattedDate}`,
         description: `${event.name} i ${event.location}`,
-        images: event.imageUrl ? [event.imageUrl] : event.imageStorageId ? [`${process.env.NEXT_PUBLIC_SITE_URL || 'https://www.arrango.no'}/api/image-proxy?storageId=${event.imageStorageId}`] : ["/og-image.svg"],
+        images: event.imageUrl ? [event.imageUrl] : event.imageStorageId ? [`https://ceaseless-tapir-769.convex.cloud/api/storage/${event.imageStorageId}`] : ["/og-image.svg"],
         site: "@arrango", // Optional: Twitter handle
       },
       alternates: {
