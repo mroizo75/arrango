@@ -28,7 +28,7 @@ import { useRouter } from "next/navigation";
 import { useRef, useState, useTransition } from "react";
 import Image from "next/image";
 import { Id } from "@/convex/_generated/dataModel";
-import { Loader2, AlertCircle, Upload, X, Calendar, MapPin, Ticket, Image as ImageIcon, ChevronRight, ChevronLeft, Check } from "lucide-react";
+import { Loader2, AlertCircle, Upload, X, Calendar, MapPin, Ticket, Image as ImageIcon, ChevronRight, ChevronLeft, Check, Clock, Info } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useStorageUrl } from "@/lib/hooks";
 import { CURRENCIES, detectCurrencyFromLocation, safeCurrencyCode, CurrencyCode } from "@/lib/currency";
@@ -93,7 +93,8 @@ interface EventFormProps {
 const STEPS = [
   { id: 1, name: "Grunnleggende info", icon: Calendar },
   { id: 2, name: "Billetter og pris", icon: Ticket },
-  { id: 3, name: "Arrangement bilde", icon: ImageIcon },
+  { id: 3, name: "Arrangement informasjon", icon: Info },
+  { id: 4, name: "Arrangement bilde", icon: ImageIcon },
 ];
 
 export default function EventForm({ mode, initialData }: EventFormProps) {
@@ -289,7 +290,7 @@ export default function EventForm({ mode, initialData }: EventFormProps) {
 
   const nextStep = async () => {
     const isValid = await validateStep(currentStep);
-    if (isValid && currentStep < 3) {
+    if (isValid && currentStep < 4) {
       setCurrentStep(currentStep + 1);
     }
   };
@@ -443,7 +444,7 @@ export default function EventForm({ mode, initialData }: EventFormProps) {
                   )}
                 />
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <FormField
                     control={form.control}
                     name="location"
@@ -500,6 +501,27 @@ export default function EventForm({ mode, initialData }: EventFormProps) {
                             />
                           </PopoverContent>
                         </Popover>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="checkInTime"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="flex items-center gap-2">
+                          <Clock className="w-4 h-4" />
+                          Starttid
+                        </FormLabel>
+                        <FormControl>
+                          <Input
+                            type="time"
+                            placeholder="19:00"
+                            {...field}
+                          />
+                        </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -618,8 +640,112 @@ export default function EventForm({ mode, initialData }: EventFormProps) {
             </Card>
           )}
 
-          {/* Step 3: Image Upload */}
+          {/* Step 3: Event Information */}
           {currentStep === 3 && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Info className="w-5 h-5" />
+                  Arrangement informasjon
+                </CardTitle>
+                <CardDescription>
+                  Legg til tilleggsinformasjon om arrangementet (valgfritt)
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <FormField
+                  control={form.control}
+                  name="refundPolicy"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Refusjonspolicy</FormLabel>
+                      <FormControl>
+                        <Textarea
+                          placeholder="Beskriv hvordan refusjoner håndteres..."
+                          className="min-h-[80px]"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="ageRestriction"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Aldersgrense</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="f.eks. 18 år eller ingen aldersgrense"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="dressCode"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Kleskode</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="f.eks. Dresscode eller uformelt"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="parkingInfo"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Parkeringsinformasjon</FormLabel>
+                      <FormControl>
+                        <Textarea
+                          placeholder="Informasjon om parkering..."
+                          className="min-h-[60px]"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="venueDetails"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Lokale detaljer</FormLabel>
+                      <FormControl>
+                        <Textarea
+                          placeholder="Ekstra informasjon om lokalet..."
+                          className="min-h-[60px]"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Step 4: Image Upload */}
+          {currentStep === 4 && (
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -706,7 +832,7 @@ export default function EventForm({ mode, initialData }: EventFormProps) {
               </Button>
             )}
             
-            {currentStep < 3 ? (
+            {currentStep < 4 ? (
               <Button 
                 type="button" 
                 onClick={nextStep}

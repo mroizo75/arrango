@@ -1,8 +1,5 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import {
   HelpCircle,
   Mail,
@@ -12,8 +9,6 @@ import {
   Calculator,
   Users,
   Settings,
-  ExternalLink,
-  CheckCircle,
   AlertTriangle
 } from "lucide-react";
 
