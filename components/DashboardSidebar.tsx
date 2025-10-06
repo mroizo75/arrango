@@ -14,6 +14,7 @@ import {
   HelpCircle,
   Menu,
   X,
+  Calendar,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { signOut } from "next-auth/react";
@@ -23,6 +24,7 @@ import { useState } from "react";
 
 const NAV_ITEMS = [
   { name: "Oversikt", href: "/dashboard", icon: LayoutDashboard },
+  { name: "Mine arrangementer", href: "/dashboard/events", icon: Calendar },
   { name: "Scan billetter", href: "/dashboard/scan", icon: ScanLine },
   { name: "Billetter", href: "/dashboard/tickets", icon: Ticket },
   { name: "Kunder", href: "/dashboard/customers", icon: Users },
@@ -62,7 +64,10 @@ export function DashboardSidebar() {
 
       <nav className="flex-1 space-y-1 px-3 py-4 overflow-y-auto">
         {NAV_ITEMS.map(({ name, href, icon: Icon }) => {
-          const isActive = pathname === href;
+          // Check if current page is active
+          // For "Mine arrangementer", also highlight when on edit pages
+          const isActive = pathname === href || 
+            (href === "/dashboard/events" && pathname?.startsWith("/dashboard/events"));
           return (
             <Link
               key={href}

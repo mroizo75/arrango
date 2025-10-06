@@ -139,7 +139,16 @@ export function DashboardPage({
               <div className="mt-4 text-center">
                 <Button variant="outline" asChild>
                   <Link href="/dashboard/events">
-                    Se alle arrangementer ({events.length})
+                    Se alle arrangementer ({events.length}) →
+                  </Link>
+                </Button>
+              </div>
+            )}
+            {events.length > 0 && events.length <= 6 && (
+              <div className="mt-4 text-center">
+                <Button variant="outline" asChild>
+                  <Link href="/dashboard/events">
+                    Administrer arrangementer →
                   </Link>
                 </Button>
               </div>

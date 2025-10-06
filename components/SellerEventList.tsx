@@ -113,7 +113,7 @@ function SellerEventCard({
                 {/* Share Button - Always visible */}
                 <ShareEvent
                   eventName={event.name}
-                  eventUrl={`${typeof window !== 'undefined' ? window.location.origin : 'https://arrango.no'}/event/${event._id}`}
+                  eventUrl={`${typeof window !== 'undefined' ? window.location.origin : (process.env.NEXT_PUBLIC_SITE_URL || 'https://www.arrango.no')}/event/${event._id}`}
                   eventDescription={event.description}
                   variant="outline"
                   size="sm"

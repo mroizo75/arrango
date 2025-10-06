@@ -97,7 +97,14 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
           },
         ],
         siteName: "Arrango",
+        locale: "nb_NO",
       },
+      // Facebook specific tags (optional but recommended)
+      ...(process.env.FACEBOOK_APP_ID && {
+        other: {
+          'fb:app_id': process.env.FACEBOOK_APP_ID,
+        }
+      }),
       twitter: {
         card: "summary_large_image",
         title: `${event.name} - ${formattedDate}`,
