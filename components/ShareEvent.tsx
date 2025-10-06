@@ -10,14 +10,13 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Share2, Check, Copy, Mail, Share } from "lucide-react";
+import { Share2, Check, Copy, Mail } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 
 interface ShareEventProps {
   eventName: string;
   eventUrl: string;
   eventDescription?: string;
-  eventImage?: string;
   variant?: "default" | "outline" | "secondary";
   size?: "default" | "sm" | "lg";
   className?: string;
@@ -27,7 +26,6 @@ export function ShareEvent({
   eventName,
   eventUrl,
   eventDescription = "",
-  eventImage,
   variant = "outline",
   size = "default",
   className = ""
@@ -51,66 +49,32 @@ export function ShareEvent({
     }
   };
 
-  const handleNativeShare = async () => {
-    if (typeof navigator !== 'undefined' && typeof navigator.share === 'function') {
-      try {
-        const shareData: ShareData = {
-          title: eventName,
-          text: eventDescription,
-          url: eventUrl,
-        };
-
-        if (eventImage) {
-          try {
-            const response = await fetch(eventImage);
-            const blob = await response.blob();
-            const file = new File([blob], 'event-image.jpg', { type: blob.type });
-
-            const shareDataWithImage = {
-              ...shareData,
-              files: [file],
-            };
-
-            await navigator.share(shareDataWithImage);
-          } catch (imageError) {
-            console.warn('Could not include image in native share, sharing without image:', imageError);
-            await navigator.share(shareData);
-          }
-        } else {
-          await navigator.share(shareData);
-        }
-
-        toast({
-          title: "Arrangement delt!",
-        });
-      } catch (error) {
-        console.error('Error sharing:', error);
-        toast({
-          title: "Deling avbrutt",
-          variant: "destructive",
-        });
-      }
-    }
-  };
 
  
 
   const shareToFacebook = () => {
-    const url = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(eventUrl)}&quote=${encodeURIComponent(`${eventName} - ${eventDescription}`)}`;
+    // Legg til timestamp for å unngå caching av metadata
+    const shareUrl = `${eventUrl}?fb_refresh=${Date.now()}`;
+    const url = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}&quote=${encodeURIComponent(`${eventName} - ${eventDescription}`)}`;
     try {
       const popup = window.open(url, 'facebook-share', 'width=600,height=400,scrollbars=yes,resizable=yes');
       if (!popup || popup.closed) {
         handleCopyLink();
         toast({
           title: "Facebook-deling blokkert",
-          description: "Lenken er kopiert. Lim den inn i Facebook.",
+          description: "Lenken er kopiert. Lim den inn i Facebook for å dele med bilde.",
+        });
+      } else {
+        toast({
+          title: "Facebook-deling åpnet",
+          description: "Bildet vil vises når du deler lenken.",
         });
       }
     } catch {
       handleCopyLink();
       toast({
         title: "Deling feilet",
-        description: "Lenken er kopiert. Lim den inn i Facebook.",
+        description: "Lenken er kopiert. Lim den inn i Facebook for å dele med bilde.",
         variant: "destructive",
       });
     }
@@ -118,42 +82,54 @@ export function ShareEvent({
 
   const shareToX = () => {
     const text = `Sjekk ut ${eventName}! ${eventDescription}`;
-    const url = `https://x.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(eventUrl)}`;
+    const shareUrl = `${eventUrl}?x_refresh=${Date.now()}`;
+    const url = `https://x.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(shareUrl)}`;
     try {
       const popup = window.open(url, 'X-share', 'width=600,height=400,scrollbars=yes,resizable=yes');
       if (!popup || popup.closed) {
         handleCopyLink();
         toast({
           title: "X-deling blokkert",
-          description: "Lenken er kopiert. Lim den inn i X.",
+          description: "Lenken er kopiert. Lim den inn i X for å dele med bilde.",
+        });
+      } else {
+        toast({
+          title: "X-deling åpnet",
+          description: "Bildet vil vises i tweeten.",
         });
       }
     } catch {
       handleCopyLink();
       toast({
         title: "Deling feilet",
-        description: "Lenken er kopiert. Lim den inn i X.",
+        description: "Lenken er kopiert. Lim den inn i X for å dele med bilde.",
         variant: "destructive",
       });
     }
   };
 
   const shareToLinkedIn = () => {
-    const url = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(eventUrl)}&title=${encodeURIComponent(eventName)}&summary=${encodeURIComponent(eventDescription)}`;
+    const shareUrl = `${eventUrl}?li_refresh=${Date.now()}`;
+    const url = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(shareUrl)}&title=${encodeURIComponent(eventName)}&summary=${encodeURIComponent(eventDescription)}`;
     try {
       const popup = window.open(url, 'linkedin-share', 'width=600,height=400,scrollbars=yes,resizable=yes');
       if (!popup || popup.closed) {
         handleCopyLink();
         toast({
           title: "LinkedIn-deling blokkert",
-          description: "Lenken er kopiert. Lim den inn i LinkedIn.",
+          description: "Lenken er kopiert. Lim den inn i LinkedIn for å dele med bilde.",
+        });
+      } else {
+        toast({
+          title: "LinkedIn-deling åpnet",
+          description: "Bildet vil vises når du deler lenken.",
         });
       }
     } catch {
       handleCopyLink();
       toast({
         title: "Deling feilet",
-        description: "Lenken er kopiert. Lim den inn i LinkedIn.",
+        description: "Lenken er kopiert. Lim den inn i LinkedIn for å dele med bilde.",
         variant: "destructive",
       });
     }
@@ -198,17 +174,6 @@ export function ShareEvent({
             </>
           )}
         </DropdownMenuItem>
-        {typeof navigator !== 'undefined' && typeof navigator.share === 'function' && (
-          <>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={handleNativeShare}>
-              <Share className="mr-2 h-4 w-4" />
-              <span>Del med bilde</span>
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-          </>
-        )}
-        {!navigator.share && <DropdownMenuSeparator />}
         <DropdownMenuItem onClick={shareToFacebook}>
           <svg className="mr-2 h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
             <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>

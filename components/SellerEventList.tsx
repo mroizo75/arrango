@@ -115,7 +115,6 @@ function SellerEventCard({
                   eventName={event.name}
                   eventUrl={`${typeof window !== 'undefined' ? window.location.origin : 'https://arrango.no'}/event/${event._id}`}
                   eventDescription={event.description}
-                  eventImage={imageUrl || undefined}
                   variant="outline"
                   size="sm"
                 />
