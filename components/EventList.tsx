@@ -130,7 +130,7 @@ const EventList = React.memo(function EventList({ limit, showFeaturedOrganizers 
 
       {/* Events Grid */}
       {displayedEvents.length > 0 ? (
-        <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 ${!limit ? 'mb-12' : ''}`}>
+        <div className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 ${!limit ? 'mb-12' : ''}`}>
           {displayedEvents.map((event) => (
             <EventCard key={event._id} eventId={event._id} />
           ))}
@@ -181,7 +181,7 @@ const EventList = React.memo(function EventList({ limit, showFeaturedOrganizers 
       {!limit && pastEvents.length > 0 && (
         <>
           <h2 className="text-2xl font-bold text-gray-900 mb-6">Tidligere arrangementer</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {pastEvents.map((event) => (
               <EventCard key={event._id} eventId={event._id} />
             ))}

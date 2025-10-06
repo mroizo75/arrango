@@ -181,111 +181,83 @@ export default function EventCard({ eventId, showAdditionalPurchase = false }: E
   return (
     <div
       onClick={() => router.push(`/event/${eventId}`)}
-      className={`bg-white rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 border border-gray-100 cursor-pointer overflow-hidden relative ${
+      className={`group bg-white rounded-lg shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-200 cursor-pointer overflow-hidden ${
         isPastEvent ? "opacity-75 hover:opacity-100" : ""
       }`}
     >
       {/* Event Image */}
       {imageUrl && (
-        <div className="relative w-full h-48">
+        <div className="relative w-full h-40 overflow-hidden">
           <Image
             src={imageUrl}
             alt={event.name}
             fill
-            className="object-cover"
+            className="object-cover group-hover:scale-105 transition-transform duration-300"
             priority
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
-        </div>
-      )}
-
-      <div className={`p-6 ${imageUrl ? "relative" : ""}`}>
-        <div className="flex justify-between items-start">
-          <div>
-            <div className="flex flex-col items-start gap-2">
-              {isEventOwner && (
-                <span className="inline-flex items-center gap-1 bg-blue-600/90 text-white px-2 py-1 rounded-full text-xs font-medium">
-                  <StarIcon className="w-3 h-3" />
-                  Your Event
-                </span>
-              )}
-              <h2 className="text-2xl font-bold text-gray-900">{event.name}</h2>
-            </div>
-            {isPastEvent && (
-              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 mt-2">
-                Past Event
-              </span>
-            )}
-          </div>
-
-          {/* Price Tag */}
-          <div className="flex flex-col items-end gap-2 ml-4">
+          {/* Price and Status Badge Overlay */}
+          <div className="absolute top-2 right-2 flex flex-col gap-1 items-end">
             <span
-              className={`px-4 py-1.5 font-semibold rounded-full ${
+              className={`px-3 py-1 text-sm font-bold rounded-full shadow-md backdrop-blur-sm ${
                 isPastEvent
-                  ? "bg-gray-50 text-gray-500"
-                  : "bg-green-50 text-green-700"
+                  ? "bg-gray-100/90 text-gray-700"
+                  : "bg-white/90 text-blue-600"
               }`}
             >
-{formatPrice(event.price, safeCurrencyCode(event.currency))}
+              {formatPrice(event.price, safeCurrencyCode(event.currency))}
             </span>
             {availability.purchasedCount >= availability.totalTickets && (
-              <span className="px-4 py-1.5 bg-red-50 text-red-700 font-semibold rounded-full text-sm">
-                Sold Out
+              <span className="px-2 py-1 bg-red-500/90 text-white font-medium rounded-full text-xs shadow-md backdrop-blur-sm">
+                Utsolgt
+              </span>
+            )}
+            {isEventOwner && (
+              <span className="inline-flex items-center gap-1 bg-blue-600/90 text-white px-2 py-1 rounded-full text-xs font-medium shadow-md backdrop-blur-sm">
+                <StarIcon className="w-3 h-3" />
+                Ditt
               </span>
             )}
           </div>
-        </div>
-
-        <div className="mt-4 space-y-3">
-          <div className="flex items-center text-gray-600">
-            <MapPin className="w-4 h-4 mr-2" />
-            <span>{event.location}</span>
-          </div>
-
-          <div className="flex items-center text-gray-600">
-            <CalendarDays className="w-4 h-4 mr-2" />
-            <span>
-              {new Date(event.eventDate).toLocaleDateString()}{" "}
-              {isPastEvent && "(Ended)"}
-            </span>
-          </div>
-
-          {organizer?.organizerSlug && (
-            <div className="flex items-center text-gray-600">
-              <User className="w-4 h-4 mr-2" />
-              <span>
-                Arrangør:{" "}
-                <Link
-                  href={`/organizer/${organizer.organizerSlug}`}
-                  className="text-blue-600 hover:underline"
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  {organizer.organizerName}
-                </Link>
+          {isPastEvent && (
+            <div className="absolute bottom-2 left-2">
+              <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-900/70 text-white backdrop-blur-sm">
+                Tidligere
               </span>
             </div>
           )}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
+        </div>
+      )}
+
+      <div className="p-4">
+        <h3 className="text-lg font-bold text-gray-900 line-clamp-1 mb-2 group-hover:text-blue-600 transition-colors">
+          {event.name}
+        </h3>
+
+        <div className="space-y-2 text-sm">
+          <div className="flex items-center text-gray-600">
+            <CalendarDays className="w-4 h-4 mr-2 flex-shrink-0" />
+            <span className="truncate">
+              {new Date(event.eventDate).toLocaleDateString("nb-NO", {
+                day: "numeric",
+                month: "short",
+                year: "numeric",
+              })}
+            </span>
+          </div>
 
           <div className="flex items-center text-gray-600">
-            <Ticket className="w-4 h-4 mr-2" />
-            <span>
-              {availability.totalTickets - availability.purchasedCount} /{" "}
-              {availability.totalTickets} available
-              {!isPastEvent && availability.activeOffers > 0 && (
-                <span className="text-amber-600 text-sm ml-2">
-                  ({availability.activeOffers}{" "}
-                  {availability.activeOffers === 1 ? "person" : "people"} trying
-                  to buy)
-                </span>
-              )}
+            <MapPin className="w-4 h-4 mr-2 flex-shrink-0" />
+            <span className="truncate">{event.location}</span>
+          </div>
+
+          <div className="flex items-center text-gray-600">
+            <Ticket className="w-4 h-4 mr-2 flex-shrink-0" />
+            <span className="truncate">
+              {availability.totalTickets - availability.purchasedCount} / {availability.totalTickets} ledige
             </span>
           </div>
         </div>
-
-        <p className="mt-4 text-gray-600 text-sm line-clamp-2">
-          {event.description}
-        </p>
 
         <div onClick={(e) => e.stopPropagation()}>
           {!isPastEvent && renderTicketStatus()}

@@ -59,7 +59,7 @@ export default function Home() {
           </div>
         </div>
 
-        <EventList limit={9} showFeaturedOrganizers={true} showCTA={true} />
+        <EventList limit={12} showFeaturedOrganizers={true} showCTA={true} />
       </div>
     </div>
   );

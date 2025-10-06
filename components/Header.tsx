@@ -30,36 +30,22 @@ function Header({ isSeller = false }: HeaderProps) {
   };
 
   return (
-    <div className="border-b">
-      <div className="flex flex-col lg:flex-row items-center gap-4 p-4">
-        <div className="flex items-center justify-between w-full lg:w-auto">
-          <Link href="/" className="font-bold shrink-0">
-            <Image
-              src={logo}
-              alt="logo"
-              width={200}
-              height={200}
-              className="w-24 lg:w-28"
-            />
-          </Link>
-
-          {/* Mobile Menu Button */}
-          <div className="lg:hidden">
-            <button
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
-              aria-label={isMobileMenuOpen ? "Lukk meny" : "Åpne meny"}
-              aria-expanded={isMobileMenuOpen}
-            >
-              {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-            </button>
-          </div>
-        </div>
+    <div className="border-b shadow-sm border-gray-200">
+      <div className="flex items-center px-6 lg:px-8 py-3 max-w-screen-2xl mx-auto w-full">
+        <Link href="/" className="shrink-0 inline-block lg:pl-20">
+          <Image
+            src={logo}
+            alt="logo"
+            width={200}
+            height={200}
+            className="w-28 lg:w-36 h-auto block"
+          />
+        </Link>
 
         {/* Desktop Menu */}
-        <div className="hidden lg:block ml-auto">
+        <div className="hidden lg:flex items-center gap-2 ml-auto lg:mr-20">
           {isAuthenticated ? (
-            <div className="flex items-center gap-3">
+            <>
               {isSeller && (
                 <Link href="/dashboard">
                   <Button variant="default" size="sm" className="bg-blue-600 hover:bg-blue-700">
@@ -102,12 +88,9 @@ function Header({ isSeller = false }: HeaderProps) {
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
-            </div>
+            </>
           ) : (
-            <div className="flex items-center gap-4">
-              <Link href="/arrangorer" className="text-gray-800 hover:text-blue-600 text-lg">
-                Arrangører
-              </Link>
+            <>
               <Link href="/sign-in">
                 <Button variant="outline" size="sm">
                   Logg inn
@@ -118,7 +101,7 @@ function Header({ isSeller = false }: HeaderProps) {
                   Bli arrangør
                 </Button>
               </Link>
-            </div>
+            </>
           )}
 
           {isLoading && (
@@ -126,9 +109,23 @@ function Header({ isSeller = false }: HeaderProps) {
           )}
         </div>
 
-        {/* Mobile Menu */}
+        {/* Mobile Menu Button */}
+        <div className="lg:hidden ml-auto">
+          <button
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
+            aria-label={isMobileMenuOpen ? "Lukk meny" : "Åpne meny"}
+            aria-expanded={isMobileMenuOpen}
+          >
+            {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+          </button>
+        </div>
+      </div>
+
+      {/* Mobile Menu */}
+      <div className="lg:hidden">
         {isMobileMenuOpen && (
-          <div className="lg:hidden w-full border-t border-gray-200 pt-4 mt-4">
+          <div className="w-full border-t border-gray-200 px-6 py-4">
             {isAuthenticated ? (
               <div className="flex flex-col gap-3">
                 <div className="px-4 py-2 bg-gray-50 rounded-lg">
@@ -171,15 +168,6 @@ function Header({ isSeller = false }: HeaderProps) {
               </div>
             ) : (
               <div className="flex flex-col gap-3">
-                <Link
-                  href="/arrangorer"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  <Button variant="outline" className="w-full">
-                    Arrangører
-                  </Button>
-                </Link>
-                
                 <Link
                   href="/become-organizer"
                   onClick={() => setIsMobileMenuOpen(false)}
