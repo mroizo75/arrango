@@ -1,9 +1,24 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { ConvexHttpClient } from 'convex/browser'
-import { api } from '@/convex/_generated/api'
-import { Id } from '@/convex/_generated/dataModel'
+import { readFile } from 'fs/promises'
+import { join } from 'path'
 
-const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!)
+async function getFallbackImage() {
+  try {
+    // Try to read the fallback image from public folder
+    const imagePath = join(process.cwd(), 'public', 'og-image.png')
+    const imageBuffer = await readFile(imagePath)
+    return new NextResponse(Buffer.from(imageBuffer), {
+      status: 200,
+      headers: {
+        'Content-Type': 'image/png',
+        'Cache-Control': 'public, max-age=3600',
+      },
+    })
+  } catch {
+    // If that fails, return a simple response
+    return new NextResponse('Image not found', { status: 404 })
+  }
+}
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url)
@@ -16,35 +31,36 @@ export async function GET(request: NextRequest) {
   console.log(`Image proxy request for storageId: ${storageId}`)
 
   try {
-    // Get the direct Convex storage URL
-    const url = await convex.query(api.storage.getPublicImageUrl, { storageId: storageId as Id<"_storage"> })
+    // Build the Convex storage URL directly (no need to query Convex)
+    // Format: https://[deployment].convex.cloud/api/storage/[storageId]
+    const convexUrl = process.env.NEXT_PUBLIC_CONVEX_URL!.replace('/api', '')
+    const imageUrl = `${convexUrl}/api/storage/${storageId}`
+    
+    console.log(`Fetching image from Convex URL: ${imageUrl}`)
 
-    if (!url) {
-      console.error(`Image not found for storageId: ${storageId}`)
-      return NextResponse.redirect('/og-image.svg', {
-        headers: {
-          'Cache-Control': 'public, max-age=3600',
-        },
-      })
+    // Fetch the image from Convex and proxy it
+    // This ensures social media crawlers can access it without authentication issues
+    const imageResponse = await fetch(imageUrl)
+    
+    if (!imageResponse.ok) {
+      console.error(`Failed to fetch image from Convex: ${imageResponse.status}`)
+      return await getFallbackImage()
     }
 
-    console.log(`Redirecting to Convex URL: ${url}`)
+    const imageBuffer = await imageResponse.arrayBuffer()
+    const contentType = imageResponse.headers.get('content-type') || 'image/jpeg'
 
-    // Simply redirect to the direct Convex URL
-    // Social media crawlers should be able to follow redirects
-    return NextResponse.redirect(url, {
+    // Return the image with proper cache headers for social media
+    return new NextResponse(imageBuffer, {
+      status: 200,
       headers: {
-        'Cache-Control': 'public, max-age=3600',
+        'Content-Type': contentType,
+        'Cache-Control': 'public, max-age=31536000, immutable', // Cache for 1 year since storage IDs don't change
+        'Access-Control-Allow-Origin': '*', // Allow social media crawlers
       },
     })
   } catch (error) {
-    console.error(`Error fetching image URL for storageId ${storageId}:`, error)
-
-    // Return default OG image as final fallback
-    return NextResponse.redirect('/og-image.svg', {
-      headers: {
-        'Cache-Control': 'public, max-age=3600',
-      },
-    })
+    console.error(`Error proxying image for storageId ${storageId}:`, error)
+    return await getFallbackImage()
   }
 }

@@ -1,6 +1,8 @@
 import { Metadata } from "next";
 import { ShareEvent } from "@/components/ShareEvent";
 
+const testImageUrl = `${process.env.NEXT_PUBLIC_SITE_URL || 'https://www.arrango.no'}/api/image-proxy?storageId=ef202ec4-b587-4db2-8dd3-8d09c29c216e`;
+
 export const metadata: Metadata = {
   title: "Test Image Sharing | Arrango",
   description: "Testing image sharing functionality",
@@ -9,7 +11,7 @@ export const metadata: Metadata = {
         description: "Testing image sharing functionality",
         images: [
           {
-            url: "https://ceaseless-tapir-769.convex.cloud/api/storage/ef202ec4-b587-4db2-8dd3-8d09c29c216e?cache=test-image",
+            url: testImageUrl,
             width: 1200,
             height: 630,
             alt: "Test image for sharing functionality",
@@ -20,7 +22,7 @@ export const metadata: Metadata = {
         card: "summary_large_image",
         title: "Test Image Sharing",
         description: "Testing image sharing functionality",
-        images: ["https://ceaseless-tapir-769.convex.cloud/api/storage/ef202ec4-b587-4db2-8dd3-8d09c29c216e?cache=test-image"],
+        images: [testImageUrl],
       },
 };
 
@@ -57,8 +59,8 @@ export default function TestImagePage() {
                   <div>
                     <h2 className="text-lg font-semibold mb-2">Test Metadata:</h2>
                     <div className="bg-gray-100 p-4 rounded font-mono text-sm">
-                      <p><strong>og:image:</strong> https://ceaseless-tapir-769.convex.cloud/api/storage/ef202ec4-b587-4db2-8dd3-8d09c29c216e?cache=test-image</p>
-                      <p><strong>twitter:image:</strong> https://ceaseless-tapir-769.convex.cloud/api/storage/ef202ec4-b587-4db2-8dd3-8d09c29c216e?cache=test-image</p>
+                      <p><strong>og:image:</strong> /api/image-proxy?storageId=ef202ec4-b587-4db2-8dd3-8d09c29c216e</p>
+                      <p><strong>twitter:image:</strong> /api/image-proxy?storageId=ef202ec4-b587-4db2-8dd3-8d09c29c216e</p>
                     </div>
                   </div>
 

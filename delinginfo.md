@@ -74,7 +74,14 @@ metadataBase sørger for at images.url blir absolutt (krav hos flere plattformer
 nextjs.org
 +1
 
-Note om Convex: Ikke gi delingsbildet som en midlertidig/signed URL som utløper (da mister Facebook/X bildet ved rescrape). Last opp delingsbilder til et offentlig bucket (S3/R2/Supabase Storage el.) og lagre en fast HTTPS-URL i Convex-dokumentet.
+Note om Convex: Ikke gi delingsbildet som en midlertidig/signed URL som utløper (da mister Facebook/X bildet ved rescrape). 
+
+**LØSNING IMPLEMENTERT:** Vi bruker nå `/api/image-proxy?storageId=xxx` som proxyer Convex bilder og returnerer dem med lange cache-headers. Dette gjør bildene tilgjengelige for sosiale medier uten autentiseringsproblemer. Image-proxy ruten:
+- Henter bildet fra Convex storage
+- Returnerer bildet direkte (ikke redirect) slik at alle crawlers kan lese det
+- Setter lange cache-headers (1 år) siden storage IDs aldri endres
+- Har CORS headers for å tillate crawling fra sosiale medier
+- Faller tilbake til /og-image.png hvis bildet ikke finnes
 
 2) Bruk riktig bildestørrelse og format
 

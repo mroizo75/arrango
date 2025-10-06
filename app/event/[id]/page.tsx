@@ -36,6 +36,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
     console.log(`Generating metadata for event: ${event.name}, imageStorageId: ${event.imageStorageId}`);
 
+    // Use image proxy for Open Graph to ensure social media can access the image
+    const imageUrl = event.imageStorageId 
+      ? `${process.env.NEXT_PUBLIC_SITE_URL || 'https://www.arrango.no'}/api/image-proxy?storageId=${event.imageStorageId}`
+      : `${process.env.NEXT_PUBLIC_SITE_URL || 'https://www.arrango.no'}/og-image.png`;
+
     const metadata = {
       title: `${event.name} | Arrango`,
       description,
@@ -60,7 +65,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         url: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://www.arrango.no'}/event/${resolvedParams.id}`,
         images: [
           {
-            url: `https://ceaseless-tapir-769.convex.cloud/api/storage/${event.imageStorageId || 'ef202ec4-b587-4db2-8dd3-8d09c29c216e'}`,
+            url: imageUrl,
             width: 1200,
             height: 630,
             alt: `${event.name} - ${event.location}`,
@@ -72,7 +77,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         card: "summary_large_image",
         title: `${event.name} - ${formattedDate}`,
         description: `${event.name} i ${event.location}`,
-        images: [`https://ceaseless-tapir-769.convex.cloud/api/storage/${event.imageStorageId || 'ef202ec4-b587-4db2-8dd3-8d09c29c216e'}`],
+        images: [imageUrl],
         site: "@arrango", // Optional: Twitter handle
       },
       alternates: {
