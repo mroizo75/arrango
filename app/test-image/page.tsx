@@ -4,24 +4,24 @@ import { ShareEvent } from "@/components/ShareEvent";
 export const metadata: Metadata = {
   title: "Test Image Sharing | Arrango",
   description: "Testing image sharing functionality",
-  openGraph: {
-    title: "Test Image Sharing",
-    description: "Testing image sharing functionality",
-    images: [
-      {
-        url: "https://arrango.no/api/image-proxy?storageId=ef202ec4-b587-4db2-8dd3-8d09c29c216e",
-        width: 400,
-        height: 400,
-        alt: "Test image",
+      openGraph: {
+        title: "Test Image Sharing",
+        description: "Testing image sharing functionality",
+        images: [
+          {
+            url: "https://arrango.no/og-image.svg",
+            width: 1200,
+            height: 630,
+            alt: "Arrango - Enklere billettsalg for bedre arrangementer",
+          },
+        ],
       },
-    ],
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "Test Image Sharing",
-    description: "Testing image sharing functionality",
-    images: ["https://arrango.no/api/image-proxy?storageId=ef202ec4-b587-4db2-8dd3-8d09c29c216e"],
-  },
+      twitter: {
+        card: "summary_large_image",
+        title: "Test Image Sharing",
+        description: "Testing image sharing functionality",
+        images: ["https://arrango.no/og-image.svg"],
+      },
 };
 
 export default function TestImagePage() {

@@ -65,14 +65,21 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
             height: 630,
             alt: `${event.name} - ${event.location}`,
           },
-        ] : [],
+        ] : [
+          {
+            url: "https://arrango.no/og-image.svg",
+            width: 1200,
+            height: 630,
+            alt: "Arrango - Enklere billettsalg for bedre arrangementer",
+          },
+        ],
         siteName: "Arrango",
       },
       twitter: {
-        card: event.imageStorageId ? "summary_large_image" : "summary",
+        card: "summary_large_image",
         title: `${event.name} - ${formattedDate}`,
         description: `${event.name} i ${event.location}`,
-        images: event.imageStorageId ? [`https://arrango.no/api/image-proxy?storageId=${event.imageStorageId}`] : [],
+        images: event.imageStorageId ? [`https://arrango.no/api/image-proxy?storageId=${event.imageStorageId}`] : ["https://arrango.no/og-image.svg"],
         site: "@arrango", // Optional: Twitter handle
       },
       alternates: {

@@ -83,16 +83,16 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Arrango - Billetter til arrangementer verden over",
     description: "Finn og kjøp billetter til de beste arrangementene over hele verden. Sikker billettkjøp med Stripe. Støtter flere valutaer. Gratis for arrangører!",
-    url: "https://arrango.no",
+    url: "https://www.arrango.no",
     siteName: "Arrango",
     locale: "nb_NO",
     type: "website",
     images: [
       {
-        url: "/images/logo.png",
+        url: "https://www.arrango.no/og-image.svg",
         width: 1200,
         height: 630,
-        alt: "Arrango - Internasjonal billettplattform",
+        alt: "Arrango - Enklere billettsalg for bedre arrangementer",
       },
     ],
   },
@@ -100,7 +100,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Arrango - Billetter til arrangementer verden over",
     description: "Finn og kjøp billetter til de beste arrangementene over hele verden. Sikker billettkjøp med Stripe.",
-    images: ["/images/logo.png"],
+    images: ["https://www.arrango.no/og-image.svg"],
     creator: "@arrango",
   },
   robots: {
