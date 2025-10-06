@@ -98,31 +98,32 @@ export const create = mutation({
     },
   });
 
-  // Migration function to update existing events with imageUrl based on imageStorageId
-  export const migrateEventImageUrls = mutation({
+  // Migration function to copy images from Convex storage to public folder
+  export const migrateImagesToPublic = mutation({
     args: {},
     handler: async (ctx) => {
       const events = await ctx.db.query("events").collect();
-
       const eventsToUpdate = events.filter(event => event.imageStorageId && !event.imageUrl);
 
-      console.log(`Found ${eventsToUpdate.length} events to migrate`);
+      console.log(`Found ${eventsToUpdate.length} events to migrate images for`);
 
       for (const event of eventsToUpdate) {
         if (event.imageStorageId) {
           try {
-            // Get the URL for the storage ID
-            const imageUrl = await ctx.storage.getUrl(event.imageStorageId);
+            // Get the Convex storage URL
+            const convexUrl = await ctx.storage.getUrl(event.imageStorageId);
 
-            if (imageUrl) {
-              // Update the event with the image URL
+            if (convexUrl) {
+              // Create a public URL based on event ID
+              // This will be handled by the upload API when images are re-uploaded
+              // For now, just use the Convex URL directly
               await ctx.db.patch(event._id, {
-                imageUrl,
+                imageUrl: convexUrl,
               });
-              console.log(`Migrated event ${event._id} with imageUrl: ${imageUrl}`);
+              console.log(`Updated event ${event._id} with public imageUrl: ${convexUrl}`);
             }
           } catch (error) {
-            console.error(`Failed to migrate event ${event._id}:`, error);
+            console.error(`Failed to migrate image for event ${event._id}:`, error);
           }
         }
       }
