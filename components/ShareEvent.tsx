@@ -53,8 +53,8 @@ export function ShareEvent({
  
 
   const shareToFacebook = () => {
-    // Legg til timestamp for å unngå caching av metadata
-    const shareUrl = `${eventUrl}?fb_refresh=${Date.now()}`;
+    // Legg til timestamp og cache-buster for å unngå caching av metadata
+    const shareUrl = `${eventUrl}?fb_refresh=${Date.now()}&utm_source=facebook&utm_medium=social`;
     const url = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}&quote=${encodeURIComponent(`${eventName} - ${eventDescription}`)}`;
     try {
       const popup = window.open(url, 'facebook-share', 'width=600,height=400,scrollbars=yes,resizable=yes');
@@ -82,7 +82,7 @@ export function ShareEvent({
 
   const shareToX = () => {
     const text = `Sjekk ut ${eventName}! ${eventDescription}`;
-    const shareUrl = `${eventUrl}?x_refresh=${Date.now()}`;
+    const shareUrl = `${eventUrl}?x_refresh=${Date.now()}&utm_source=twitter&utm_medium=social`;
     const url = `https://x.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(shareUrl)}`;
     try {
       const popup = window.open(url, 'X-share', 'width=600,height=400,scrollbars=yes,resizable=yes');
@@ -109,7 +109,7 @@ export function ShareEvent({
   };
 
   const shareToLinkedIn = () => {
-    const shareUrl = `${eventUrl}?li_refresh=${Date.now()}`;
+    const shareUrl = `${eventUrl}?li_refresh=${Date.now()}&utm_source=linkedin&utm_medium=social`;
     const url = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(shareUrl)}&title=${encodeURIComponent(eventName)}&summary=${encodeURIComponent(eventDescription)}`;
     try {
       const popup = window.open(url, 'linkedin-share', 'width=600,height=400,scrollbars=yes,resizable=yes');

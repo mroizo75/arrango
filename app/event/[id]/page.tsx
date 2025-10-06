@@ -64,12 +64,14 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
             alt: `${event.name} - ${event.location}`,
           },
         ] : [],
+        siteName: "Arrango",
       },
       twitter: {
         card: event.imageStorageId ? "summary_large_image" : "summary",
         title: `${event.name} - ${formattedDate}`,
         description: `${event.name} i ${event.location}`,
         images: event.imageStorageId ? [`https://arrango.no/api/image-proxy?storageId=${event.imageStorageId}`] : [],
+        site: "@arrango", // Optional: Twitter handle
       },
       alternates: {
         canonical: `https://arrango.no/event/${resolvedParams.id}`,

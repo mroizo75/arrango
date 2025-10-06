@@ -26,17 +26,48 @@ export async function GET(request: NextRequest) {
         status: 200,
         headers: {
           'Content-Type': 'image/png',
-          'Cache-Control': 'public, max-age=300', // Cache for 5 minutes
+          'Cache-Control': 'public, max-age=300',
         },
       })
     }
 
-    // Redirect to the actual image URL with caching headers
-    return NextResponse.redirect(url, {
-      headers: {
-        'Cache-Control': 'public, max-age=3600', // Cache for 1 hour
-      },
-    })
+    // Fetch the image and return it directly to avoid CORS issues
+    try {
+      const imageResponse = await fetch(url, {
+        headers: {
+          'User-Agent': 'Arrango-Bot/1.0', // Identify ourselves
+        },
+      })
+
+      if (!imageResponse.ok) {
+        throw new Error(`Failed to fetch image: ${imageResponse.status}`)
+      }
+
+      const imageBuffer = await imageResponse.arrayBuffer()
+      const contentType = imageResponse.headers.get('content-type') || 'image/jpeg'
+
+      return new NextResponse(imageBuffer, {
+        status: 200,
+        headers: {
+          'Content-Type': contentType,
+          'Cache-Control': 'public, max-age=3600', // Cache for 1 hour
+          'Access-Control-Allow-Origin': '*', // Allow CORS for all origins
+          'Access-Control-Allow-Methods': 'GET',
+        },
+      })
+    } catch (fetchError) {
+      console.error(`Failed to fetch image from ${url}:`, fetchError)
+      // Return a 1x1 transparent PNG as fallback
+      const transparentPng = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg=='
+      return new NextResponse(Buffer.from(transparentPng, 'base64'), {
+        status: 200,
+        headers: {
+          'Content-Type': 'image/png',
+          'Cache-Control': 'public, max-age=300',
+          'Access-Control-Allow-Origin': '*',
+        },
+      })
+    }
   } catch (error) {
     console.error(`Error fetching image URL for storageId ${storageId}:`, error)
 
