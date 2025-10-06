@@ -9,7 +9,7 @@ export const metadata: Metadata = {
         description: "Testing image sharing functionality",
         images: [
           {
-            url: "https://arrango.no/og-image.svg",
+            url: "/og-image.svg",
             width: 1200,
             height: 630,
             alt: "Arrango - Enklere billettsalg for bedre arrangementer",
@@ -20,7 +20,7 @@ export const metadata: Metadata = {
         card: "summary_large_image",
         title: "Test Image Sharing",
         description: "Testing image sharing functionality",
-        images: ["https://arrango.no/og-image.svg"],
+        images: ["/og-image.svg"],
       },
 };
 

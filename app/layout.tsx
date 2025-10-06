@@ -89,7 +89,7 @@ export const metadata: Metadata = {
     type: "website",
     images: [
       {
-        url: "https://www.arrango.no/og-image.svg",
+        url: "/og-image.svg",
         width: 1200,
         height: 630,
         alt: "Arrango - Enklere billettsalg for bedre arrangementer",
@@ -100,7 +100,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Arrango - Billetter til arrangementer verden over",
     description: "Finn og kjøp billetter til de beste arrangementene over hele verden. Sikker billettkjøp med Stripe.",
-    images: ["https://www.arrango.no/og-image.svg"],
+    images: ["/og-image.svg"],
     creator: "@arrango",
   },
   robots: {
