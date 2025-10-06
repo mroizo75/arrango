@@ -34,7 +34,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
     const description = `${event.name} - ${formattedDate} i ${event.location}. ${event.description?.substring(0, 150)}...`;
 
-    return {
+    console.log(`Generating metadata for event: ${event.name}, imageStorageId: ${event.imageStorageId}`);
+
+    const metadata = {
       title: `${event.name} | Arrango`,
       description,
       keywords: [
@@ -77,6 +79,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         canonical: `https://arrango.no/event/${resolvedParams.id}`,
       },
     };
+
+    console.log('Generated metadata:', JSON.stringify(metadata, null, 2));
+    return metadata;
   } catch (error) {
     console.error("Error generating event metadata:", error);
     return {

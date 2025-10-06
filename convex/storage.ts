@@ -1,5 +1,5 @@
 import { v } from "convex/values";
-import { mutation, query, action } from "./_generated/server";
+import { mutation, query } from "./_generated/server";
 
 export const generateUploadUrl = mutation(async (ctx) => {
   return await ctx.storage.generateUploadUrl();
@@ -24,8 +24,8 @@ export const getUrl = query({
   },
 });
 
-// Public action for image URLs (can be called without auth from server)
-export const getPublicImageUrl = action({
+// Public query for image URLs (no auth required)
+export const getPublicImageUrl = query({
   args: { storageId: v.id("_storage") },
   handler: async (ctx, { storageId }) => {
     return await ctx.storage.getUrl(storageId);

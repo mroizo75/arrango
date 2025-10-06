@@ -1,10 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { ConvexHttpClient } from 'convex/browser'
-import { api } from '@/convex/_generated/api'
-import { Id } from '@/convex/_generated/dataModel'
-
-// Create Convex client without auth for public image access
-const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!)
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url)
@@ -14,71 +8,29 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'Storage ID required' }, { status: 400 })
   }
 
-  try {
-    // Try to get the image URL using the public action
-    const url = await convex.action(api.storage.getPublicImageUrl, { storageId: storageId as Id<"_storage"> })
+  console.log(`Image proxy request for storageId: ${storageId}`)
 
-    if (!url) {
-      console.error(`Image not found for storageId: ${storageId}`)
-      // Return a 1x1 transparent PNG as fallback to avoid broken images
-      const transparentPng = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg=='
-      return new NextResponse(Buffer.from(transparentPng, 'base64'), {
-        status: 200,
-        headers: {
-          'Content-Type': 'image/png',
-          'Cache-Control': 'public, max-age=300',
-        },
-      })
-    }
+  // For testing: Return a simple colored square instead of fetching from Convex
+  // This will help us see if the metadata and image delivery works
+  const testImageSvg = `
+    <svg width="400" height="400" xmlns="http://www.w3.org/2000/svg">
+      <rect width="400" height="400" fill="#3b82f6"/>
+      <text x="200" y="200" text-anchor="middle" fill="white" font-family="Arial" font-size="24">
+        Test Image
+      </text>
+      <text x="200" y="230" text-anchor="middle" fill="white" font-family="Arial" font-size="12">
+        ${storageId.substring(0, 8)}
+      </text>
+    </svg>
+  `
 
-    // Fetch the image and return it directly to avoid CORS issues
-    try {
-      const imageResponse = await fetch(url, {
-        headers: {
-          'User-Agent': 'Arrango-Bot/1.0', // Identify ourselves
-        },
-      })
-
-      if (!imageResponse.ok) {
-        throw new Error(`Failed to fetch image: ${imageResponse.status}`)
-      }
-
-      const imageBuffer = await imageResponse.arrayBuffer()
-      const contentType = imageResponse.headers.get('content-type') || 'image/jpeg'
-
-      return new NextResponse(imageBuffer, {
-        status: 200,
-        headers: {
-          'Content-Type': contentType,
-          'Cache-Control': 'public, max-age=3600', // Cache for 1 hour
-          'Access-Control-Allow-Origin': '*', // Allow CORS for all origins
-          'Access-Control-Allow-Methods': 'GET',
-        },
-      })
-    } catch (fetchError) {
-      console.error(`Failed to fetch image from ${url}:`, fetchError)
-      // Return a 1x1 transparent PNG as fallback
-      const transparentPng = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg=='
-      return new NextResponse(Buffer.from(transparentPng, 'base64'), {
-        status: 200,
-        headers: {
-          'Content-Type': 'image/png',
-          'Cache-Control': 'public, max-age=300',
-          'Access-Control-Allow-Origin': '*',
-        },
-      })
-    }
-  } catch (error) {
-    console.error(`Error fetching image URL for storageId ${storageId}:`, error)
-
-    // Return a 1x1 transparent PNG as fallback instead of error
-    const transparentPng = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg=='
-    return new NextResponse(Buffer.from(transparentPng, 'base64'), {
-      status: 200,
-      headers: {
-        'Content-Type': 'image/png',
-        'Cache-Control': 'public, max-age=300',
-      },
-    })
-  }
+  return new NextResponse(testImageSvg, {
+    status: 200,
+    headers: {
+      'Content-Type': 'image/svg+xml',
+      'Cache-Control': 'public, max-age=300',
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'GET',
+    },
+  })
 }
