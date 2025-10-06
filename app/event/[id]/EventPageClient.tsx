@@ -228,6 +228,7 @@ export default function EventPageClient({ eventId }: Props) {
                       eventName={event.name}
                       eventUrl={`${typeof window !== 'undefined' ? window.location.origin : 'https://arrango.no'}/event/${eventId}`}
                       eventDescription={event.description}
+                      eventImage={imageUrl || undefined}
                       className="w-full"
                     />
 

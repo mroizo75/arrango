@@ -116,6 +116,7 @@ function EventItem({ event }: EventItemProps) {
                 eventName={event.name}
                 eventUrl={`${typeof window !== 'undefined' ? window.location.origin : 'https://arrango.no'}/event/${event._id}`}
                 eventDescription={`Arrangement av ${event.organizerName}`}
+                eventImage={eventImageUrl || undefined}
                 variant="outline"
                 size="sm"
                 className="flex-1 sm:flex-none"
@@ -323,6 +324,7 @@ export default function OrganizerPageClient({ slug }: Props) {
                     eventName={`${organizer.organizerName} - Arrangør`}
                     eventUrl={`${typeof window !== 'undefined' ? window.location.origin : 'https://arrango.no'}/organizer/${slug}`}
                     eventDescription={organizer.organizerBio || organizer.organizerDescription || ""}
+                    eventImage={logoUrl || undefined}
                     variant="outline"
                     size="default"
                   />
