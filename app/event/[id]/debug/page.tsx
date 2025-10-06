@@ -13,18 +13,27 @@ export default async function DebugPage({ params }: Props) {
   
   let event = null;
   let error = null;
+  let convexImageUrl = null;
   
   try {
     event = await convex.query(api.events.getById, {
       eventId: resolvedParams.id as Id<"events">,
     });
+    
+    if (event?.imageStorageId) {
+      try {
+        convexImageUrl = await convex.query(api.storage.getPublicImageUrl, { 
+          storageId: event.imageStorageId 
+        });
+      } catch (e: any) {
+        error = `Failed to get image URL: ${e.message}`;
+      }
+    }
   } catch (e: any) {
     error = e.message;
   }
 
-  const imageUrl = event?.imageStorageId 
-    ? `${process.env.NEXT_PUBLIC_SITE_URL || 'https://www.arrango.no'}/api/image-proxy?storageId=${event.imageStorageId}`
-    : `${process.env.NEXT_PUBLIC_SITE_URL || 'https://www.arrango.no'}/og-image.png`;
+  const imageUrl = convexImageUrl || `${process.env.NEXT_PUBLIC_SITE_URL || 'https://www.arrango.no'}/og-image.png`;
 
   return (
     <div className="min-h-screen bg-gray-100 p-8">
@@ -59,8 +68,25 @@ export default async function DebugPage({ params }: Props) {
               </div>
 
               <div>
-                <h2 className="text-xl font-semibold mb-2">Image URL for Open Graph:</h2>
-                <code className="bg-gray-100 p-2 rounded block break-all">
+                <h2 className="text-xl font-semibold mb-2">Convex Image URL (direkte):</h2>
+                <code className="bg-gray-100 p-2 rounded block break-all text-sm">
+                  {convexImageUrl || 'Ikke hentet'}
+                </code>
+                {convexImageUrl && (
+                  <a 
+                    href={convexImageUrl} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="text-blue-600 hover:underline mt-2 inline-block"
+                  >
+                    Åpne Convex URL i ny fane →
+                  </a>
+                )}
+              </div>
+
+              <div>
+                <h2 className="text-xl font-semibold mb-2">Final Image URL for Open Graph:</h2>
+                <code className="bg-gray-100 p-2 rounded block break-all text-sm">
                   {imageUrl}
                 </code>
                 <a 
