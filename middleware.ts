@@ -28,6 +28,7 @@ export default withAuth(
         if (
           path.startsWith("/api/webhooks") ||
           path.startsWith("/api/auth") ||
+          path.startsWith("/api/image-proxy") ||
           path.startsWith("/_next") ||
           path.includes(".")
         ) {
