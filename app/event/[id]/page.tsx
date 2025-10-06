@@ -58,26 +58,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         description,
         type: "website",
         url: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://www.arrango.no'}/event/${resolvedParams.id}`,
-        images: event.imageUrl ? [
+        images: [
           {
-            url: `${event.imageUrl}?cache=${resolvedParams.id}`,
+            url: `https://ceaseless-tapir-769.convex.cloud/api/storage/${event.imageStorageId || 'ef202ec4-b587-4db2-8dd3-8d09c29c216e'}`,
             width: 1200,
             height: 630,
             alt: `${event.name} - ${event.location}`,
-          },
-        ] : event.imageStorageId ? [
-          {
-            url: `https://ceaseless-tapir-769.convex.cloud/api/storage/${event.imageStorageId}?cache=${resolvedParams.id}`,
-            width: 1200,
-            height: 630,
-            alt: `${event.name} - ${event.location}`,
-          },
-        ] : [
-          {
-            url: "/og-image.svg",
-            width: 1200,
-            height: 630,
-            alt: "Arrango - Enklere billettsalg for bedre arrangementer",
           },
         ],
         siteName: "Arrango",
@@ -86,7 +72,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         card: "summary_large_image",
         title: `${event.name} - ${formattedDate}`,
         description: `${event.name} i ${event.location}`,
-        images: event.imageUrl ? [`${event.imageUrl}?cache=${resolvedParams.id}`] : event.imageStorageId ? [`https://ceaseless-tapir-769.convex.cloud/api/storage/${event.imageStorageId}?cache=${resolvedParams.id}`] : ["/og-image.svg"],
+        images: [`https://ceaseless-tapir-769.convex.cloud/api/storage/${event.imageStorageId || 'ef202ec4-b587-4db2-8dd3-8d09c29c216e'}`],
         site: "@arrango", // Optional: Twitter handle
       },
       alternates: {
