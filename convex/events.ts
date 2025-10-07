@@ -81,56 +81,125 @@ export const create = mutation({
       additionalInfo: args.additionalInfo,
       venueDetails: args.venueDetails,
     });
+
+    // Automatically create a default ticket type for the event
+    await ctx.db.insert("ticketTypes", {
+      eventId,
+      name: args.price === 0 ? "Gratis billett" : "Standard billett",
+      description: args.price === 0 ? "Gratis adgang til arrangementet" : "Standard adgang til arrangementet",
+      price: args.price,
+      currency: args.currency || "NOK",
+      maxQuantity: args.totalTickets,
+      soldQuantity: 0,
+      sortOrder: 0,
+      isActive: true,
+      benefits: undefined,
+    });
+
     return eventId;
   },
 });
 
 // Update event image URL for public sharing
-  export const updateEventImageUrl = mutation({
-    args: {
-      eventId: v.id("events"),
-      imageUrl: v.string(),
-    },
-    handler: async (ctx, { eventId, imageUrl }) => {
-      await ctx.db.patch(eventId, {
-        imageUrl,
-      });
-    },
-  });
+export const updateEventImageUrl = mutation({
+  args: {
+    eventId: v.id("events"),
+    imageUrl: v.string(),
+  },
+  handler: async (ctx, { eventId, imageUrl }) => {
+    await ctx.db.patch(eventId, {
+      imageUrl,
+    });
+  },
+});
 
-  // Migration function to copy images from Convex storage to public folder
-  export const migrateImagesToPublic = mutation({
-    args: {},
-    handler: async (ctx) => {
+// Migration function to create default ticket types for events that don't have any
+export const createDefaultTicketTypes = mutation({
+  args: {},
+  handler: async (ctx) => {
+    try {
       const events = await ctx.db.query("events").collect();
-      const eventsToUpdate = events.filter(event => event.imageStorageId && !event.imageUrl);
+      
+      let eventsWithoutTicketTypes = 0;
+      let ticketTypesCreated = 0;
+      const errors: string[] = [];
 
-      console.log(`Found ${eventsToUpdate.length} events to migrate images for`);
+      for (const event of events) {
+        try {
+          // Check if event has any ticket types
+          const existingTicketTypes = await ctx.db
+            .query("ticketTypes")
+            .withIndex("by_event", (q) => q.eq("eventId", event._id))
+            .collect();
 
-      for (const event of eventsToUpdate) {
-        if (event.imageStorageId) {
-          try {
-            // Get the Convex storage URL
-            const convexUrl = await ctx.storage.getUrl(event.imageStorageId);
-
-            if (convexUrl) {
-              // Create a public URL based on event ID
-              // This will be handled by the upload API when images are re-uploaded
-              // For now, just use the Convex URL directly
-              await ctx.db.patch(event._id, {
-                imageUrl: convexUrl,
-              });
-              console.log(`Updated event ${event._id} with public imageUrl: ${convexUrl}`);
-            }
-          } catch (error) {
-            console.error(`Failed to migrate image for event ${event._id}:`, error);
+          if (existingTicketTypes.length === 0) {
+            // Create default ticket type
+            await ctx.db.insert("ticketTypes", {
+              eventId: event._id,
+              name: event.price === 0 ? "Gratis billett" : "Standard billett",
+              description: event.price === 0 ? "Gratis adgang til arrangementet" : "Standard adgang til arrangementet",
+              price: event.price,
+              currency: event.currency || "NOK",
+              maxQuantity: event.totalTickets,
+              soldQuantity: 0,
+              sortOrder: 0,
+              isActive: true,
+            });
+            eventsWithoutTicketTypes++;
+            ticketTypesCreated++;
           }
+        } catch (error: any) {
+          console.error(`Error processing event ${event._id}:`, error);
+          errors.push(`Event ${event._id}: ${error.message}`);
         }
       }
 
-      return { migratedCount: eventsToUpdate.length };
-    },
-  });
+      return {
+        totalEvents: events.length,
+        eventsWithoutTicketTypes,
+        ticketTypesCreated,
+        errors: errors.length > 0 ? errors : undefined,
+      };
+    } catch (error: any) {
+      console.error("Migration failed:", error);
+      throw new Error(`Migration failed: ${error.message}`);
+    }
+  },
+});
+
+// Migration function to copy images from Convex storage to public folder
+export const migrateImagesToPublic = mutation({
+  args: {},
+  handler: async (ctx) => {
+    const events = await ctx.db.query("events").collect();
+    const eventsToUpdate = events.filter(event => event.imageStorageId && !event.imageUrl);
+
+    console.log(`Found ${eventsToUpdate.length} events to migrate images for`);
+
+    for (const event of eventsToUpdate) {
+      if (event.imageStorageId) {
+        try {
+          // Get the Convex storage URL
+          const convexUrl = await ctx.storage.getUrl(event.imageStorageId);
+
+          if (convexUrl) {
+            // Create a public URL based on event ID
+            // This will be handled by the upload API when images are re-uploaded
+            // For now, just use the Convex URL directly
+            await ctx.db.patch(event._id, {
+              imageUrl: convexUrl,
+            });
+            console.log(`Updated event ${event._id} with public imageUrl: ${convexUrl}`);
+          }
+        } catch (error) {
+          console.error(`Failed to migrate image for event ${event._id}:`, error);
+        }
+      }
+    }
+
+    return { migratedCount: eventsToUpdate.length };
+  },
+});
 
 // Helper function to check ticket availability for an event
 export const checkAvailability = query({
