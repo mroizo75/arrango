@@ -14,6 +14,8 @@ import { formatPrice, safeCurrencyCode } from "@/lib/currency";
 import Link from "next/link";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
+import { AuthModal } from "@/components/AuthModal";
+import { useState } from "react";
 
 type Props = {
   eventId: Id<"events">;
@@ -22,6 +24,7 @@ type Props = {
 export default function EventPageClient({ eventId }: Props) {
   const { data: session } = useSession();
   const user = session?.user;
+  const [showAuthModal, setShowAuthModal] = useState(false);
   const event = useQuery(api.events.getById, {
     eventId,
   });
@@ -237,11 +240,19 @@ export default function EventPageClient({ eventId }: Props) {
                         userId={user.id}
                       />
                     ) : (
-                      <Link href="/sign-in">
-                        <Button className="w-full bg-gradient-to-r from-blue-600 to-blue-800 hover:from-blue-700 hover:to-blue-900 text-white font-medium py-2 px-4 rounded-lg transition-all duration-200 shadow-md hover:shadow-lg">
+                      <>
+                        <Button 
+                          onClick={() => setShowAuthModal(true)}
+                          className="w-full bg-gradient-to-r from-blue-600 to-blue-800 hover:from-blue-700 hover:to-blue-900 text-white font-medium py-2 px-4 rounded-lg transition-all duration-200 shadow-md hover:shadow-lg"
+                        >
                           Logg inn for å kjøpe billetter
                         </Button>
-                      </Link>
+                        <AuthModal 
+                          open={showAuthModal} 
+                          onOpenChange={setShowAuthModal}
+                          callbackUrl={`/event/${eventId}`}
+                        />
+                      </>
                     )}
                   </div>
                 </div>

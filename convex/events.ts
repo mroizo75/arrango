@@ -117,53 +117,68 @@ export const updateEventImageUrl = mutation({
 export const createDefaultTicketTypes = mutation({
   args: {},
   handler: async (ctx) => {
+    console.log("Starting migration...");
+    
+    let events;
     try {
-      const events = await ctx.db.query("events").collect();
-      
-      let eventsWithoutTicketTypes = 0;
-      let ticketTypesCreated = 0;
-      const errors: string[] = [];
-
-      for (const event of events) {
-        try {
-          // Check if event has any ticket types
-          const existingTicketTypes = await ctx.db
-            .query("ticketTypes")
-            .withIndex("by_event", (q) => q.eq("eventId", event._id))
-            .collect();
-
-          if (existingTicketTypes.length === 0) {
-            // Create default ticket type
-            await ctx.db.insert("ticketTypes", {
-              eventId: event._id,
-              name: event.price === 0 ? "Gratis billett" : "Standard billett",
-              description: event.price === 0 ? "Gratis adgang til arrangementet" : "Standard adgang til arrangementet",
-              price: event.price,
-              currency: event.currency || "NOK",
-              maxQuantity: event.totalTickets,
-              soldQuantity: 0,
-              sortOrder: 0,
-              isActive: true,
-            });
-            eventsWithoutTicketTypes++;
-            ticketTypesCreated++;
-          }
-        } catch (error: any) {
-          console.error(`Error processing event ${event._id}:`, error);
-          errors.push(`Event ${event._id}: ${error.message}`);
-        }
-      }
-
-      return {
-        totalEvents: events.length,
-        eventsWithoutTicketTypes,
-        ticketTypesCreated,
-        errors: errors.length > 0 ? errors : undefined,
-      };
+      events = await ctx.db.query("events").collect();
+      console.log(`Found ${events.length} events`);
     } catch (error: any) {
-      console.error("Migration failed:", error);
-      throw new Error(`Migration failed: ${error.message}`);
+      console.error("Failed to fetch events:", error);
+      throw new Error(`Failed to fetch events: ${error.message || error.toString()}`);
     }
+    
+    let eventsWithoutTicketTypes = 0;
+    let ticketTypesCreated = 0;
+    const errors: string[] = [];
+
+    for (const event of events) {
+      try {
+        console.log(`Processing event ${event._id}`);
+        
+        // Check if event has any ticket types
+        const existingTicketTypes = await ctx.db
+          .query("ticketTypes")
+          .withIndex("by_event", (q) => q.eq("eventId", event._id))
+          .collect();
+
+        console.log(`Event ${event._id} has ${existingTicketTypes.length} ticket types`);
+
+        if (existingTicketTypes.length === 0) {
+          console.log(`Creating ticket type for event ${event._id}`);
+          
+          // Create default ticket type
+          await ctx.db.insert("ticketTypes", {
+            eventId: event._id,
+            name: event.price === 0 ? "Gratis billett" : "Standard billett",
+            description: event.price === 0 ? "Gratis adgang til arrangementet" : "Standard adgang til arrangementet",
+            price: event.price,
+            currency: event.currency || "NOK",
+            maxQuantity: event.totalTickets,
+            soldQuantity: 0,
+            sortOrder: 0,
+            isActive: true,
+          });
+          
+          console.log(`Successfully created ticket type for event ${event._id}`);
+          eventsWithoutTicketTypes++;
+          ticketTypesCreated++;
+        }
+      } catch (error: any) {
+        const errorMsg = error.message || error.toString();
+        console.error(`Error processing event ${event._id}:`, errorMsg);
+        errors.push(`Event ${event._id}: ${errorMsg}`);
+      }
+    }
+
+    console.log(`Migration complete: ${ticketTypesCreated} ticket types created`);
+
+    return {
+      totalEvents: events.length,
+      eventsWithoutTicketTypes,
+      ticketTypesCreated,
+      errors: errors.length > 0 ? errors : undefined,
+    };
   },
 });
 
