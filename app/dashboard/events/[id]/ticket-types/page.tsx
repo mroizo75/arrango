@@ -67,12 +67,12 @@ export default function EventTicketTypesPage() {
         </div>
 
         {/* Info Alert */}
-        <Alert className="mb-6">
-          <InfoIcon className="h-4 w-4" />
-          <AlertTitle>Om billett-typer</AlertTitle>
-          <AlertDescription>
-            Opprett forskjellige billett-typer for ditt arrangement (f.eks. VIP, Early Bird, Standing). 
-            Hver type kan ha sin egen pris, antall og fordeler.
+        <Alert className="mb-6 bg-blue-50 border-blue-200">
+          <InfoIcon className="h-4 w-4 text-blue-600" />
+          <AlertTitle className="text-blue-900">Legg til billett-typer (valgfritt)</AlertTitle>
+          <AlertDescription className="text-blue-800">
+            Arrangementet ditt har allerede en standard billett-type. Du kan legge til flere typer 
+            (f.eks. VIP, Early Bird, Standing) med ulike priser og fordeler, eller hoppe over dette steget.
           </AlertDescription>
         </Alert>
 
@@ -82,6 +82,16 @@ export default function EventTicketTypesPage() {
             eventId={eventId} 
             eventCurrency={event.currency || "NOK"} 
           />
+        </div>
+
+        {/* Action Buttons */}
+        <div className="flex justify-end gap-3 mt-6">
+          <Link
+            href="/dashboard/events"
+            className="px-6 py-3 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+          >
+            Ferdig - Gå til mine arrangementer
+          </Link>
         </div>
       </div>
     </div>

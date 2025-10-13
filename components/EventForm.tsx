@@ -214,17 +214,24 @@ export default function EventForm({ mode, initialData }: EventFormProps) {
           };
 
           if (mode === "create") {
-            await createEvent({
+            const newEventId = await createEvent({
               userId: user.id,
               ...eventData,
             });
 
             toast({
               title: "Arrangement opprettet! 🎉",
-              description: "Ditt arrangement er nå publisert",
+              description: hasStripe 
+                ? "Nå kan du legge til billett-typer" 
+                : "Ditt arrangement er nå publisert",
             });
 
-            router.push(`/dashboard/events`);
+            // Redirect to ticket types page if Stripe is connected, otherwise to events list
+            if (hasStripe) {
+              router.push(`/dashboard/events/${newEventId}/ticket-types`);
+            } else {
+              router.push(`/dashboard/events`);
+            }
           } else if (initialData) {
             await updateEvent({
               eventId: initialData._id,
@@ -542,6 +549,11 @@ export default function EventForm({ mode, initialData }: EventFormProps) {
                 </CardTitle>
                 <CardDescription>
                   Sett priser og antall billetter
+                  {hasStripe && mode === "create" && (
+                    <span className="block mt-2 text-blue-600">
+                      💡 Du kan legge til flere billett-typer (VIP, Early Bird, etc.) etter at arrangementet er opprettet
+                    </span>
+                  )}
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
