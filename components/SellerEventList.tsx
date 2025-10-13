@@ -122,11 +122,18 @@ function SellerEventCard({
                 {!isPastEvent && !event.is_cancelled && (
                   <>
                     <Link
+                      href={`/dashboard/events/${event._id}/ticket-types`}
+                      className="shrink-0 flex items-center gap-2 px-4 py-2 text-sm font-medium text-blue-700 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors"
+                    >
+                      <Ticket className="w-4 h-4" />
+                      Billett-typer
+                    </Link>
+                    <Link
                       href={`/dashboard/events/${event._id}/edit`}
                       className="shrink-0 flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
                     >
                       <Edit className="w-4 h-4" />
-                      Edit
+                      Rediger
                     </Link>
                     <CancelEventButton eventId={event._id} />
                   </>
