@@ -13,6 +13,7 @@ import { Loader2, CreditCard, CheckCircle, AlertTriangle, ExternalLink } from "l
 import { useToast } from "@/hooks/use-toast";
 import { createStripeConnectAccountLink } from "@/app/actions/createStripeConnectAccountLink";
 import { getStripeConnectAccountStatus, type AccountStatus } from "@/app/actions/getStripeConnectAccountStatus";
+import { createStripeConnectCustomer } from "@/app/actions/createStripeConnectCustomer";
 
 export default function StripeConnectSettings() {
   const [isLoading, setIsLoading] = useState(false);
@@ -25,7 +26,6 @@ export default function StripeConnectSettings() {
   const stripeAccount = useQuery(api.users.getUsersStripeConnectId, {
     userId: user?.id || "",
   });
-  const createAccount = useMutation(api.users.updateOrCreateUserStripeConnectId);
 
   // Fetch account status when stripeAccount changes
   React.useEffect(() => {
@@ -52,19 +52,21 @@ export default function StripeConnectSettings() {
 
     setIsLoading(true);
     try {
-      // First create a Stripe Connect account
-      await createAccount({ userId: user.id, stripeConnectId: "" });
+      // Create a Stripe Connect account via server action
+      const result = await createStripeConnectCustomer();
+      
       toast({
         title: "Stripe konto opprettet",
-        description: "Du blir nå sendt til Stripe for å fullføre oppsettet.",
+        description: "Kontoen din er klar. Start onboarding for å fullføre oppsettet.",
       });
+      
       // Reload to refresh the stripe account query
       window.location.reload();
     } catch (error) {
       console.error("Error creating Stripe account:", error);
       toast({
         title: "Feil",
-        description: "Kunne ikke opprette Stripe konto. Prøv igjen.",
+        description: error instanceof Error ? error.message : "Kunne ikke opprette Stripe konto. Prøv igjen.",
         variant: "destructive",
       });
     } finally {

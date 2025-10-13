@@ -18,13 +18,15 @@ export async function getStripeConnectAccountStatus(
   stripeAccountId: string
 ): Promise<AccountStatus> {
   if (!stripeAccountId) {
-    throw new Error("No Stripe account ID provided");
+    throw new Error("Ingen Stripe-konto ID oppgitt");
   }
 
   try {
+    console.log(`Fetching Stripe Connect account status for: ${stripeAccountId}`);
+    
     const account = await stripe.accounts.retrieve(stripeAccountId);
 
-    return {
+    const status = {
       isActive:
         account.details_submitted &&
         !account.requirements?.currently_due?.length,
@@ -41,8 +43,22 @@ export async function getStripeConnectAccountStatus(
       chargesEnabled: account.charges_enabled,
       payoutsEnabled: account.payouts_enabled,
     };
+
+    console.log(`Stripe account status for ${stripeAccountId}:`, {
+      isActive: status.isActive,
+      chargesEnabled: status.chargesEnabled,
+      payoutsEnabled: status.payoutsEnabled,
+      requirementsCount: status.requirements.currently_due.length,
+    });
+
+    return status;
   } catch (error) {
-    console.error("Error fetching Stripe Connect account status:", error);
-    throw new Error("Failed to fetch Stripe Connect account status");
+    console.error(`Error fetching Stripe Connect account status for ${stripeAccountId}:`, error);
+    
+    if (error instanceof Error) {
+      throw new Error(`Kunne ikke hente Stripe-kontostatus: ${error.message}`);
+    }
+    
+    throw new Error("Kunne ikke hente Stripe-kontostatus");
   }
 }
