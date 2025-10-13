@@ -1,0 +1,298 @@
+---
+alwaysApply: true
+1) Kjerneprinsipper
+
+Én vei å gjøre ting på. Velg mønster én gang, bruk det overalt.
+
+Lesbarhet > smarthet. Koden skal være åpenbar, ikke imponerende.
+
+Små, trygge steg. Korte PR-er; hyppig integrasjon; grønn build.
+
+Ren kjerne, effekter i kantene. Domenelogikk er ren; IO i adaptere.
+
+Kontrakter først. All I/O valideres ved grensene (API, DB, queue, fil).
+
+Idempotens & determinisme. Særlig for jobber, webhooks og betaling.
+
+Målbarhet. Logg, metrics og sporbarhet fra dag 1.
+
+2) Navngivning, struktur og moduler
+
+Navn
+
+Variabler/funksjoner: camelCase
+
+Typer/klasser/komponenter: PascalCase
+
+Konstanter/enums: SCREAMING_SNAKE_CASE
+
+Filer: kebab-case.ext (ett hovedkonsept per fil)
+
+Mappeoppsett (feature-først)
+
+/<feature>/
+  domain/       // rene typer og regler (ingen IO)
+  app/          // use cases/services (orkestrering)
+  infra/        // gateways/adaptere/klienter (HTTP/DB/Queue/Cache)
+  ui/           // presentasjon (komponenter, sider)
+  tests/        // en speiling av modulene over
+
+
+Regel: Domenet kjenner ikke til UI/infra. Infra kan kjenne domenet.
+
+3) Funksjonsstil og kontrollflyt
+
+Guard clauses i starten av funksjoner:
+
+if (!user) return err('not_authenticated');
+if (!hasAccess(user, resource)) return err('forbidden');
+
+
+Én ansvarlighet per funksjon. Maks 25–40 LOC før du vurderer å trekke ut logikk.
+
+async/await i ny kode. Ikke bland med .then() i samme fil.
+
+Immutability by default. Ikke muter input; opprett kopier.
+
+4) Typer, kontrakter og validering
+
+Eksplisitte signaturer på alle public funksjoner (input + returtype).
+
+Validering ved grense (API, server actions, job konsum, webhook, CLI).
+
+Domeneobjekter er alltid gyldige (invariants holdes i konstruksjon/fabrikk).
+
+Brandede typer for ID-er og penger:
+
+type UserId = string & { readonly brand: unique symbol };
+type Money = { amount: number; currency: 'NOK'|'USD' };
+
+
+Ingen any ut av grense. Bruk unioner, enums eller branda typer.
+
+5) Feilhåndtering (én standard)
+
+Kast i kjernen, oversett ved grense.
+Domenet kan throw; UI/API oversetter til standard form.
+
+Standard feilform:
+
+type AppError = { code: string; message: string; cause?: unknown; details?: Record<string,unknown> };
+
+
+Ikke “svelg” feil. catch skal enten logge eller re-kaste i standard form.
+
+Eksempel (API-grense):
+
+try {
+  const input = parse(dtoSchema, req.body);
+  const result = await useCase.run(input);
+  return ok(result);
+} catch (e) {
+  const err = toAppError(e);
+  log.error({ err, path: 'POST /orders' });
+  return fail(err); // riktig HTTP-kode/format settes her
+}
+
+6) Avhengigheter og “lib-disiplin”
+
+Whitelist-tenkning: Nye biblioteker krever begrunnelse og godkjenning.
+
+Ett ansvar per lib: én HTTP-klient, én logger, én test-runner.
+
+Ingen “snik-utils”. Felles helpers i shared/ eller core/ – ikke lokale kopier.
+
+7) IO, adaptere og sideeffekter
+
+All IO går via adapter (DB, HTTP, cache, fil, queue). Ingen direkte kall fra domenet.
+
+Timeout, retry, circuit-breaker konfigureres i adapter, ikke i featurekode.
+
+Idempotente writes: bruk nøkler/idempotency keys når mulig (webhooks, betaling).
+
+Mapping: Eksterne payloads mappes til interne typer før bruk.
+
+8) Data og migrasjoner
+
+Én migrasjon per logisk endring. Ikke batch mange urelaterte i én.
+
+Forhåndssjekk: migrations er reversible (down) eller dokumenter rollback-plan.
+
+Seed: idempotent, deterministisk, uten nettverk der det er mulig.
+
+9) Testing (lite, men riktig)
+
+Pyramiden: flest enhetstester (domene + mapping), færre integrasjonstester (adaptere), noen E2E (kritiske brukerreiser).
+
+Test det som kan feile. Happy path + 1–2 skarpe edge cases per funksjon.
+
+Mock kun i kantene. Ikke mock domenelogikk.
+
+Navn beskriver atferd, ikke implementasjon.
+
+it('reserves inventory when payment succeeds')
+
+10) Observability og operasjon
+
+Loggstruktur: JSON-logger, én logger overalt. Ingen console.log i commit.
+
+Kontekst i logger: requestId, userId, feature, path.
+
+Metrics: latency, feilrate, throughput for alle viktige flows.
+
+Trace-ID propageres gjennom jobber/HTTP-kall.
+
+11) Sikkerhet (grunnregler)
+
+Aldri interpolér uvalidert data i queries/markup.
+
+Sekreter kun via miljøvariabler/secret manager; aldri i repo/PR-tekst.
+
+Least privilege: tokens/keys har minimal tilgang.
+
+Input-normalisering: trim, lower/upper, tillatte sett, maks lengder.
+
+12) Ytelse og ressursbruk
+
+Mål før du optimaliserer. Bruk profiler/metrics for å finne flasker.
+
+Strøm store datasett (pagination/chunking) i stedet for å laste alt.
+
+Cache med eier. Cache har ansvarlig modul og eksplisitt invalidation-strategi.
+
+Lazy/dynamic import for tunge klientavhengigheter.
+
+13) UI/komponent-disiplin (rammeverk-nøytral)
+
+Container-presentational-mønster: logikk separert fra visning.
+
+Loading/Empty/Error alltid håndtert i asynkrone views.
+
+Tilgjengelighet: semantikk + aria-* for interaktive elementer.
+
+Unngå magiske tall. Bruk design tokens/variabler; konsistent spacing/typografi.
+
+14) API-design (internt og eksternt)
+
+Stabile kontrakter. Endringer er additive når mulig.
+
+Versjonering: /v1/... eller header-versjonering for eksterne API.
+
+Idempotente POSTer når naturlig (webhooks, bestillingssteg).
+
+Error-koder dokumenteres (code + message + details).
+
+15) Samarbeid: Git, PR og endringskontroll
+
+Branch-navn: feat/<område>-<beskrivelse> / fix/...
+
+Små PR-er (< ~400 LOC diff). Store endringer deles opp.
+
+PR-mal inkluderer:
+
+Hva/ hvorfor
+
+Screenshots (ved UI)
+
+Migrasjoner og dataeffekter
+
+Risiko/rollback
+
+Sjekkliste (se under)
+
+PR-sjekkliste
+
+ Følger kodereglene (denne filen)
+
+ Ingen nye libs uten begrunnelse
+
+ All I/O validert ved grense
+
+ Standard feilform i grensesnitt
+
+ Tester oppdatert (happy + edge)
+
+ Logger/metrics lagt til for ny kritisk flow
+
+ Dokumentasjon oppdatert (README/docs)
+
+16) Dokumentasjon (minimal, nyttig)
+
+Én-linje JSDoc for alle public funksjoner.
+
+Kort designkommentar (≤10 linjer) når du må ta et valg med konsekvenser.
+
+Arkitekturavgjørelser i docs/adr/NNN-title.md (problem, beslutning, alternativer, konsekvens).
+
+17) Samtidighet og transaksjoner
+
+Optimistiske lås/versjonering ved hot-rows (versjonsfelt).
+
+Transaksjoner innkapslet i én funksjon (ingen “lekkede” transaksjoner).
+
+Jobber er re-kjørbare. Bruk dedupe-nøkler og backoff-strategi.
+
+18) Feature flags og eksperimenter
+
+Flagg ved kantene. Domenet får beslutning, ikke flaggnavn.
+
+Default-trygg oppførsel. Flagg skal ikke bryte invarianter.
+
+Fjern brukte flagg etter utrulling.
+
+19) Eksempelmønstre
+
+Guard + tidlig retur
+
+export function calcPrice(base: number, discountPct: number) {
+  if (base <= 0) throw new Error('price_must_be_positive');
+  const pct = Math.min(Math.max(discountPct, 0), 90);
+  return Math.round(base * (1 - pct / 100));
+}
+
+
+Domene kaller adapter via use-case
+
+export async function placeOrder(cmd: PlaceOrderCmd): Promise<OrderId> {
+  const order = createOrder(cmd);        // validerer invariants
+  const ok = await inventory.reserve(order.lines);
+  if (!ok) throw { code: 'stock_unavailable', message: 'Not enough stock' };
+  await repo.save(order);
+  return order.id;
+}
+
+
+Standardisert feil ved grense
+
+export function toAppError(e: unknown): AppError {
+  if (isAppError(e)) return e;
+  if (isZodError(e)) return { code: 'validation_error', message: 'Invalid input', details: e.flatten() };
+  if (e instanceof Error) return { code: 'internal_error', message: e.message };
+  return { code: 'internal_error', message: 'Unknown error' };
+}
+
+
+Idempotent job
+
+export async function handleInvoicePaid(evt: Event) {
+  if (await dedupe.exists(evt.id)) return;       // allerede prosessert
+  await dedupe.remember(evt.id, { ttlSec: 3600 });
+
+  const payload = parse(invoicePaidSchema, evt.data);
+  await orders.markPaid(payload.orderId, payload.invoiceId);
+}
+
+20) Minimumskrav for “ferdig” endring
+
+Koden følger disse reglene uten unntak.
+
+Kjøres lokalt og i CI uten feil.
+
+Tester finnes for ny/endrede case (happy + edge).
+
+Logger/metrics for nye kritiske steg.
+
+Dokumentasjon (kort) oppdatert.
+
+Rollback-plan hvis det endrer data eller kontrakter.
+---
