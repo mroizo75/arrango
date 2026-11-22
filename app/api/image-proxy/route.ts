@@ -26,13 +26,9 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'Storage ID required' }, { status: 400 })
   }
 
-  console.log(`[NEW CODE] Image proxy request for storageId: ${storageId}`)
-
   try {
     const convexUrl = process.env.NEXT_PUBLIC_CONVEX_URL!.replace('/api', '')
     const imageUrl = `${convexUrl}/api/storage/${storageId}`
-    
-    console.log(`[NEW CODE] Fetching from: ${imageUrl}`)
 
     const imageResponse = await fetch(imageUrl)
     

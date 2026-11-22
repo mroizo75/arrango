@@ -22,8 +22,6 @@ export async function getStripeConnectAccountStatus(
   }
 
   try {
-    console.log(`Fetching Stripe Connect account status for: ${stripeAccountId}`);
-    
     const account = await stripe.accounts.retrieve(stripeAccountId);
 
     const status = {
@@ -43,13 +41,6 @@ export async function getStripeConnectAccountStatus(
       chargesEnabled: account.charges_enabled,
       payoutsEnabled: account.payouts_enabled,
     };
-
-    console.log(`Stripe account status for ${stripeAccountId}:`, {
-      isActive: status.isActive,
-      chargesEnabled: status.chargesEnabled,
-      payoutsEnabled: status.payoutsEnabled,
-      requirementsCount: status.requirements.currently_due.length,
-    });
 
     return status;
   } catch (error) {

@@ -46,8 +46,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
     const description = `${event.name} - ${formattedDate} i ${event.location}. ${event.description?.substring(0, 150)}...`;
 
-    console.log(`Generating metadata for event: ${event.name}, imageStorageId: ${event.imageStorageId}`);
-
     // Get the Convex storage URL directly for Open Graph
     // This is more reliable than using a proxy
     let imageUrl = `${process.env.NEXT_PUBLIC_SITE_URL || 'https://www.arrango.no'}/og-image.png`;
@@ -117,7 +115,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       },
     };
 
-    console.log('Generated metadata:', JSON.stringify(metadata, null, 2));
     return metadata;
   } catch (error) {
     console.error("Error generating event metadata:", error);

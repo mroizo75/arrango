@@ -20,8 +20,6 @@ export async function createStripeConnectCustomer() {
     const user = await requireAuth();
     const userId = user.id;
 
-    console.log(`Creating Stripe Connect account for user: ${userId}`);
-
     // Check if user already has a connect account
     const existingStripeConnectId = await convex.query(
       api.users.getUsersStripeConnectId,
@@ -31,7 +29,6 @@ export async function createStripeConnectCustomer() {
     );
 
     if (existingStripeConnectId) {
-      console.log(`User already has Stripe Connect account: ${existingStripeConnectId}`);
       return { account: existingStripeConnectId };
     }
 
@@ -44,15 +41,11 @@ export async function createStripeConnectCustomer() {
       },
     });
 
-    console.log(`Created Stripe Connect account: ${account.id}`);
-
     // Update user with stripe connect id
     await convex.mutation(api.users.updateOrCreateUserStripeConnectId, {
       userId,
       stripeConnectId: account.id,
     });
-
-    console.log(`Updated user ${userId} with Stripe Connect ID: ${account.id}`);
 
     return { account: account.id };
   } catch (error) {
